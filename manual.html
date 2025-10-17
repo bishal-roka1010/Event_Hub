@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EventHub — Contact Us</title>
+<meta name="author" content="Your Team" />
+<meta name="description" content="EventHub — contact support, send feedback, or report an issue.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="assets/css/styles.css" />
+<style>
+/* Match login/register theme */
+.page-bg{
+  background:
+    radial-gradient(1000px 380px at -10% -10%, rgba(99,102,241,.18), transparent),
+    radial-gradient(900px 360px at 110% -10%, rgba(236,72,153,.18), transparent),
+    linear-gradient(180deg, rgba(20,184,166,.06), transparent);
+}
+.card.hoverable{ transition:transform .2s ease, box-shadow .2s ease }
+.card.hoverable:hover{ transform:translateY(-4px); box-shadow:0 14px 40px rgba(0,0,0,.1) }
+.helper{ font-size:.9rem; color: var(--bs-secondary-color) }
+.input-group .btn{ border-top-left-radius:0;border-bottom-left-radius:0 }
+.counter{ font-variant-numeric: tabular-nums; }
+.kicker{
+  display:inline-flex; align-items:center; gap:.5rem; padding:.25rem .6rem; border-radius:999px;
+  background:rgba(99,102,241,.12); color:#6366f1; font-weight:600; font-size:.8rem;
+}
+.badge-soft{ background: rgba(99,102,241,.12); color:#4f46e5; border:1px solid rgba(99,102,241,.18) }
+.toast{ z-index:2000 }
+.map-embed{ border:0; border-radius:.75rem; min-height:280px }
+a.text-reset{text-decoration:none}
+@media (prefers-color-scheme: dark){
+  .map-embed{ filter: grayscale(.1) invert(.92) hue-rotate(180deg) saturate(.7) contrast(.85); }
+}
+</style>
+
+<!-- Schema for richer contact info -->
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Organization",
+  "name":"EventHub",
+  "url":"https://example.com",
+  "contactPoint":[{
+    "@type":"ContactPoint",
+    "contactType":"customer support",
+    "email":"support@eventhub.com",
+    "telephone":"+977-98XXXXXXX",
+    "areaServed":"NP",
+    "availableLanguage":["en","ne"]
+  }]
+}
+</script>
+</head>
+<body class="page-bg">
+<header class="navbar navbar-expand-lg bg-body-tertiary shadow-sm sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Event<span class="text-primary">Hub</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <nav id="nav" class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+        <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+        <li class="nav-item"><a class="nav-link active" href="contactus.html" aria-current="page">Contact</a></li>
+        <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+      </ul>
+      <div class="d-flex gap-2">
+        <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button">Theme</button>
+        <a id="loginBtn" href="login.html" class="btn btn-primary btn-sm">Login</a>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none" type="button">Logout</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="container py-5">
+  <div class="row g-4 align-items-start">
+    <!-- Left: Form -->
+    <div class="col-lg-7">
+      <div class="card hoverable shadow-sm">
+        <div class="card-body p-4 p-md-5">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <span class="kicker"><i class="bi bi-stars"></i> We’re here to help</span>
+              <h1 class="h4 mt-2 mb-1">Contact EventHub</h1>
+              <p class="helper mb-0">Send a message, share feedback, or report an issue. We’ll follow up by email.</p>
+            </div>
+            
+          </div>
+
+          <!-- Tabs -->
+          <ul class="nav nav-pills mt-4 mb-3" id="contactTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="tab-contact" data-bs-toggle="pill" data-bs-target="#pane-contact" type="button" role="tab">
+                <i class="bi bi-envelope me-1"></i> Contact
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-feedback" data-bs-toggle="pill" data-bs-target="#pane-feedback" type="button" role="tab">
+                <i class="bi bi-chat-dots me-1"></i> Feedback
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-issue" data-bs-toggle="pill" data-bs-target="#pane-issue" type="button" role="tab">
+                <i class="bi bi-bug me-1"></i> Report Issue
+              </button>
+            </li>
+          </ul>
+
+          <form id="contactForm" novalidate>
+            <div class="tab-content">
+              <!-- Shared fields (always shown) -->
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="name">Full name</label>
+                  <input id="name" name="name" type="text" class="form-control" minlength="2" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="email">Email</label>
+                  <input id="email" name="email" type="email" class="form-control" autocomplete="email" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="topic">Topic</label>
+                  <select id="topic" name="topic" class="form-select" required>
+                    <option value="">Choose a topic…</option>
+                    <option>Account & Login</option>
+                    <option>Events & RSVP</option>
+                    <option>Billing / Pro</option>
+                    <option>Bug Report</option>
+                    <option>Feature Request</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="priority">Priority</label>
+                  <select id="priority" name="priority" class="form-select" required>
+                    <option value="">Select…</option>
+                    <option>Low</option>
+                    <option>Normal</option>
+                    <option>High</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Pane-specific helpers -->
+              <div class="tab-pane fade show active mt-3" id="pane-contact" role="tabpanel" aria-labelledby="tab-contact">
+                <label class="form-label" for="subject">Subject</label>
+                <input id="subject" name="subject" type="text" class="form-control" required>
+              </div>
+
+              <div class="tab-pane fade mt-3" id="pane-feedback" role="tabpanel" aria-labelledby="tab-feedback">
+                <div class="form-text mb-2">Tell us what you like and what we can improve.</div>
+                <input id="subjectFeedback" name="subjectFeedback" type="text" class="form-control" placeholder="Optional subject">
+              </div>
+
+              <div class="tab-pane fade mt-3" id="pane-issue" role="tabpanel" aria-labelledby="tab-issue">
+                <div class="row g-3">
+                  <div class="col-md-8">
+                    <label class="form-label" for="url">Affected page (URL)</label>
+                    <input id="url" type="url" class="form-control" placeholder="http://localhost/…">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label" for="browser">Browser</label>
+                    <input id="browser" type="text" class="form-control" placeholder="e.g., Chrome 125">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Message + attachment -->
+              <div class="mt-3">
+                <label class="form-label" for="message">Message</label>
+                <textarea id="message" name="message" class="form-control" rows="6" minlength="10" maxlength="2000" required></textarea>
+                <div class="d-flex justify-content-between">
+                  <div class="form-text">Be as specific as possible. Max 2000 characters.</div>
+                  <small class="counter text-muted"><span id="charCnt">0</span>/2000</small>
+                </div>
+              </div>
+
+              <div class="mt-3">
+                <label class="form-label" for="attach">Attachment (optional)</label>
+                <input id="attach" type="file" class="form-control" accept=".png,.jpg,.jpeg,.pdf,.txt">
+                <div class="form-text">PNG, JPG, PDF, or TXT. Max 3MB in this demo.</div>
+              </div>
+
+              <!-- Honeypot + rate limit note -->
+              <input type="text" id="website" name="website" class="d-none" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+              <div id="formErrors" class="alert alert-danger d-none mt-3" role="alert" aria-live="assertive"></div>
+
+              <button id="sendBtn" type="submit" class="btn btn-primary w-100 mt-3">
+                <i class="bi bi-send me-1"></i> Send message
+              </button>
+            </div>
+          </form>
+
+          
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Quick support + details + map + FAQ -->
+    <div class="col-lg-5">
+      <div class="row g-3">
+        <div class="col-12">
+          <div class="card hoverable shadow-sm">
+            <div class="card-body p-4">
+              <h2 class="h6 text-uppercase text-muted mb-3">Quick Support</h2>
+              <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-outline-primary" href="about.html"><i class="bi bi-info-circle me-1"></i> About</a>
+                <a class="btn btn-outline-secondary" href="event.html"><i class="bi bi-calendar-event me-1"></i> Browse Events</a>
+                <button class="btn btn-outline-success" type="button" id="copyEmail"><i class="bi bi-clipboard me-1"></i> Copy support email</button>
+              </div>
+              <hr class="my-3">
+              <div class="d-flex flex-column gap-2">
+                <div><i class="bi bi-geo-alt me-2 text-primary"></i> Kathmandu, Nepal</div>
+                <div><i class="bi bi-telephone me-2 text-primary"></i> +977-98XXXXXXX</div>
+                <div><i class="bi bi-envelope me-2 text-primary"></i> <a class="text-reset" href="mailto:support@eventhub.com">support@eventhub.com</a></div>
+                <div><i class="bi bi-clock me-2 text-primary"></i> Mon–Fri, 9:00–17:00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="card hoverable shadow-sm">
+            <div class="card-body p-2">
+              <iframe
+  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.359090091857!2d85.3248282153232!3d27.670937483366!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39e7a4c8f93a52f7%3A0x179d05ba0b9cf8b9!2sTundikhel%20Park!5e0!3m2!1sen!2snp!4v1687842447487!5m2!1sen!2snp"
+  width="425"
+  height="450"
+  style="border:0; border-radius:10px;"
+  allowfullscreen=""
+  loading="lazy">
+</iframe>
+
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="card hoverable shadow-sm">
+            <div class="card-body p-4">
+              <h2 class="h6 text-uppercase text-muted mb-3">FAQ</h2>
+              <div class="accordion" id="faq">
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="q1"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#a1">Where is my data stored?</button></h2>
+                  <div id="a1" class="accordion-collapse collapse show" data-bs-parent="#faq">
+                    <div class="accordion-body helper">For this demo, all data is stored locally in your browser (Web Storage). Nothing is sent to a server.</div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="q2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a2">How do I reset my password?</button></h2>
+                  <div id="a2" class="accordion-collapse collapse" data-bs-parent="#faq">
+                    <div class="accordion-body helper">Use the “Forgot password?” link on the Login page. In this demo, it just shows a confirmation toast.</div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="q3"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a3">Can I submit screenshots?</button></h2>
+                  <div id="a3" class="accordion-collapse collapse" data-bs-parent="#faq">
+                    <div class="accordion-body helper">Yes—attach small PNG/JPG or PDF files. They are not uploaded in the demo but help you compose your report.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /row -->
+    </div>
+  </div>
+</main>
+
+<footer class="border-top mt-5">
+  <div class="container py-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <span class="fs-5 fw-bold">Event<span class="text-primary">Hub</span></span>
+      <span class="text-muted">• “Seamless Events, Unforgettable Experiences”</span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <a class="text-decoration-none" href="manual.html"><i class="bi bi-envelope me-1"></i>Contact</a>
+      <a class="text-decoration-none" href="about.html"><i class="bi bi-people me-1"></i>About</a>
+      <a class="text-decoration-none" href="event.html"><i class="bi bi-calendar-event me-1"></i>Events</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="bi bi-check-circle text-success me-2"></i> Message sent</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <p class="mb-1">Thanks for reaching out! This is a demo, so your message was handled locally.</p>
+        <small class="text-muted">We’ll get back to you at <span id="confirmEmail">your email</span>.</small>
+      </div>
+      <div class="modal-footer">
+        <a href="event.html" class="btn btn-outline-secondary">Browse Events</a>
+        <button class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="assets/js/site.js"></script>
+
+<!-- Page script -->
+<script type="module">
+  // Utilities
+  const esc = (s='') => String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+  function toast(msg, variant='primary'){
+    const el = document.createElement('div');
+    el.className = `toast align-items-center text-bg-${variant} border-0 position-fixed start-50 translate-middle-x shadow`;
+    const nav = document.querySelector('.navbar.sticky-top');
+    const offset = (nav ? nav.getBoundingClientRect().height : 56) + 12;
+    el.style.top = offset + 'px'; el.style.zIndex = '2000';
+    el.setAttribute('role','status');
+    el.innerHTML = `<div class="d-flex"><div class="toast-body">${esc(msg)}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>`;
+    document.body.appendChild(el);
+    const t = new bootstrap.Toast(el, { delay: 1700 }); t.show(); setTimeout(()=> el.remove(), 2300);
+  }
+
+  // Theme + auth UI (match other pages)
+  (function initChrome(){
+    if (localStorage.getItem('theme')==='dark') document.body.classList.add('dark');
+    document.getElementById('themeToggle')?.addEventListener('click', ()=>{
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const isLoggedIn = () => !!(localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token'));
+    if (isLoggedIn()) { loginBtn?.classList.add('d-none'); logoutBtn?.classList.remove('d-none'); }
+    logoutBtn?.addEventListener('click', ()=>{
+      localStorage.removeItem('auth_token'); localStorage.removeItem('auth_email');
+      sessionStorage.removeItem('auth_token'); sessionStorage.removeItem('auth_email');
+      location.reload();
+    });
+  })();
+
+  // Prefill email if available
+  (function prefill(){
+    const email = localStorage.getItem('auth_email') || sessionStorage.getItem('auth_email');
+    if(email) document.getElementById('email').value = email;
+  })();
+
+  // Character counter
+  const msgEl = document.getElementById('message');
+  const cntEl = document.getElementById('charCnt');
+  const updateCnt = () => cntEl.textContent = msgEl.value.length;
+  msgEl.addEventListener('input', updateCnt); updateCnt();
+
+  // Copy email
+  document.getElementById('copyEmail')?.addEventListener('click', async ()=>{
+    try{ await navigator.clipboard.writeText('support@eventhub.com'); toast('Support email copied!', 'success'); }
+    catch{ toast('Copy failed. support@eventhub.com', 'warning'); }
+  });
+
+  // Basic attachment guard (demo only)
+  document.getElementById('attach')?.addEventListener('change', (e)=>{
+    const f = e.target.files?.[0]; if(!f) return;
+    if(f.size > 3 * 1024 * 1024){ // 3 MB
+      e.target.value = '';
+      toast('Attachment too large (max 3MB in demo).', 'warning');
+    }
+  });
+
+  // Rate limit (local), honeypot, and validation
+  const LAST_SENT_KEY = 'contact_last_sent_at';
+  function tooSoon(){
+    const last = Number(localStorage.getItem(LAST_SENT_KEY)||0);
+    return Date.now() - last < 15_000; // 15s
+  }
+
+  // Dynamic subject mapping per tab
+  const tabs = document.getElementById('contactTabs');
+  function currentTab(){
+    return tabs.querySelector('.nav-link.active')?.id || 'tab-contact';
+  }
+
+  // Submit handler
+  document.getElementById('contactForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const errors = [];
+    const hp = document.getElementById('website').value.trim();
+    if(hp){ /* bot */ return; }
+    if(tooSoon()){ errors.push('You’re sending messages too quickly. Please wait a moment.'); }
+
+    const name = document.getElementById('name');
+    const email = document.getElementById('email');
+    const topic = document.getElementById('topic');
+    const priority = document.getElementById('priority');
+    const subject = document.getElementById('subject');
+    const subjectFeedback = document.getElementById('subjectFeedback');
+    const url = document.getElementById('url');
+    const browser = document.getElementById('browser');
+    const message = document.getElementById('message');
+
+    // built-in validity + small custom checks
+    const form = e.currentTarget;
+    if(!form.checkValidity()) errors.push('Please complete all required fields with valid information.');
+    if(message.value.trim().length < 10) errors.push('Message is too short.');
+    if(currentTab()==='tab-issue' && url.value && !/^https?:\/\//i.test(url.value)) errors.push('Please provide a valid URL (http/https).');
+
+    const box = document.getElementById('formErrors');
+    if(errors.length){
+      box.classList.remove('d-none'); box.innerHTML = errors.map(x=>`<div>${esc(x)}</div>`).join('');
+      box.focus(); return;
+    } else { box.classList.add('d-none'); box.innerHTML = ''; }
+
+    // Build a payload (kept local for demo)
+    const payload = {
+      name: name.value.trim(),
+      email: email.value.trim(),
+      topic: topic.value,
+      priority: priority.value,
+      tab: currentTab().replace('tab-',''),
+      subject: (subject.value || subjectFeedback.value || '[No subject]').trim(),
+      url: url.value.trim(),
+      browser: browser.value.trim(),
+      message: message.value.trim(),
+      attached: document.getElementById('attach')?.files?.[0]?.name || null,
+      ts: Date.now()
+    };
+
+    // Store locally to simulate send
+    try{
+      const list = JSON.parse(localStorage.getItem('contact_messages')||'[]');
+      list.push(payload);
+      localStorage.setItem('contact_messages', JSON.stringify(list));
+      localStorage.setItem(LAST_SENT_KEY, String(Date.now()));
+    }catch{}
+
+    // UI feedback
+    document.getElementById('confirmEmail').textContent = payload.email || 'your email';
+    new bootstrap.Modal(document.getElementById('successModal')).show();
+    toast('Message queued (demo).', 'success');
+    e.target.reset(); updateCnt();
+  });
+</script>
+</body>
+</html>

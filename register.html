@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EventHub — Register</title>
+<meta name="author" content="Your Team" />
+<meta name="description" content="EventHub — discover, filter, and RSVP to local events.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="assets/css/styles.css" />
+<style>
+/* Match login.html theming */
+.page-bg{
+  background:
+    radial-gradient(1000px 380px at -10% -10%, rgba(99,102,241,.18), transparent),
+    radial-gradient(900px 360px at 110% -10%, rgba(236,72,153,.18), transparent),
+    linear-gradient(180deg, rgba(20,184,166,.06), transparent);
+}
+.card.hoverable{ transition:transform .2s ease, box-shadow .2s ease }
+.card.hoverable:hover{ transform:translateY(-4px); box-shadow:0 14px 40px rgba(0,0,0,.1) }
+.input-group .btn{ border-top-left-radius:0;border-bottom-left-radius:0 }
+.progress.xs{ height:.4rem }
+.toast{ z-index:2000 }
+.helper{ font-size:.875rem }
+
+/* Small visual polish */
+.req-list{ list-style:none; padding-left:0; margin:.25rem 0 0 }
+.req-list li{ display:flex; align-items:center; gap:.5rem; font-size:.9rem; color:var(--bs-secondary-color) }
+.req-list li.ok{ color:var(--bs-success) }
+.req-list i{ width:1.1rem; text-align:center }
+</style>
+</head>
+<body class="page-bg">
+<header class="navbar navbar-expand-lg bg-body-tertiary shadow-sm sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Event<span class="text-primary">Hub</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <nav id="nav" class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+        <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="manual.html">Contact Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+      </ul>
+      <div class="d-flex gap-2">
+        <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button">Theme</button>
+        <a id="loginBtn" href="login.html" class="btn btn-primary btn-sm">Login</a>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none" type="button">Logout</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card hoverable shadow-sm">
+        <div class="card-body p-4 p-md-5">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h1 class="h4 mb-0">Create your account</h1>
+          </div>
+          <p class="text-muted helper mb-4">Fill the details.</p>
+
+          <form id="regForm" novalidate>
+            <div id="formErrors" class="alert alert-danger d-none" role="alert" aria-live="assertive"></div>
+
+            <label class="form-label" for="fullName">Full name</label>
+            <input id="fullName" name="fullName" type="text" class="form-control" minlength="2" required>
+
+            <label class="form-label mt-3" for="address">Address</label>
+            <input id="address" name="address" type="text" class="form-control" minlength="5" maxlength="100" required>
+
+            <label class="form-label mt-3" for="email">Email</label>
+            <input id="email" name="email" type="email" class="form-control" autocomplete="email" required>
+            <div class="form-text">Used for sign-in & RSVP confirmations.</div>
+
+            <label class="form-label mt-3" for="phone">Phone Number</label>
+            <!-- use single backslashes in pattern -->
+            <input id="phone" name="phone" type="tel" class="form-control" placeholder="+977-98xxxxxxxx"
+                   pattern="^[\d+()\-\s]{7,}$">
+
+            <label class="form-label mt-3" for="pass">Password</label>
+            <div class="input-group">
+              <input id="pass" name="pass" type="password" class="form-control" minlength="8"
+                     pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
+                     placeholder="At least 8 characters" autocomplete="new-password" required>
+              <button class="btn btn-outline-secondary" type="button" id="togglePass" aria-label="Show password">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+            <div class="progress xs mt-2" aria-hidden="true">
+              <div id="meter" class="progress-bar" role="progressbar" style="width:0%"></div>
+            </div>
+            <ul class="req-list" id="reqList">
+              <li data-rule="len"><i class="bi bi-dot"></i>At least 8 characters</li>
+              <li data-rule="case"><i class="bi bi-dot"></i>Upper & lower case</li>
+              <li data-rule="num"><i class="bi bi-dot"></i>At least one number</li>
+            </ul>
+
+            <label class="form-label mt-3" for="pass2">Confirm password</label>
+            <div class="input-group">
+              <input id="pass2" name="pass2" type="password" class="form-control" minlength="8" required>
+              <button class="btn btn-outline-secondary" type="button" id="togglePass2" aria-label="Show password">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+
+            <div class="form-check mt-3">
+              <input class="form-check-input" type="checkbox" id="terms" required>
+              <label class="form-check-label" for="terms">I agree to the <a href="#" onclick="return false;">terms of use</a>.</label>
+            </div>
+
+            <button id="submitBtn" class="btn btn-primary w-100 mt-4" type="submit">
+              <i class="bi bi-person-plus me-1"></i> Create account
+            </button>
+
+            <p id="msg" class="text-success mt-3 d-none" aria-live="polite">Registered. Redirecting…</p>
+            <p class="mt-3 helper">Already have an account? <a id="toLogin" href="login.html">Login here</a>.</p>
+          </form>
+
+          <div id="already" class="mt-3 d-none">
+            <div class="alert alert-success d-flex align-items-center" role="alert">
+              <i class="bi bi-check-circle me-2"></i>
+              You are already logged in.
+            </div>
+            <a class="btn btn-outline-primary" href="dashboard.html"><i class="bi bi-person"></i> Go to Dashboard</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="border-top mt-5">
+  <div class="container py-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <span class="fs-5 fw-bold">Event<span class="text-primary">Hub</span></span>
+      <span class="text-muted">• “Seamless Events, Unforgettable Experiences”</span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <a class="text-decoration-none" href="manual.html"><i class="bi bi-life-preserver me-1"></i>Help</a>
+      <a class="text-decoration-none" href="about.html"><i class="bi bi-people me-1"></i>About</a>
+      <a class="text-decoration-none" href="event.html"><i class="bi bi-calendar-event me-1"></i>Events</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Page script -->
+<script type="module">
+  // --- Helpers ---
+  const esc = (s='') => String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+  const isLoggedIn = () => !!(localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token'));
+
+  // Support BOTH keys so it works with your existing login no matter which it uses
+  const KEY1 = 'eventhub:users';
+  const KEY2 = 'users';
+
+  function getUsers(){
+    try{
+      const a = JSON.parse(localStorage.getItem(KEY1) || '[]');
+      const b = JSON.parse(localStorage.getItem(KEY2) || '[]');
+      // merge unique by email
+      const map = new Map();
+      [...a, ...b].forEach(u => { if(u?.email) map.set(u.email.toLowerCase(), u); });
+      return [...map.values()];
+    }catch{ return []; }
+  }
+  function saveUsers(list){
+    localStorage.setItem(KEY1, JSON.stringify(list));
+    localStorage.setItem(KEY2, JSON.stringify(list));
+  }
+
+  function toast(msg, variant='primary'){
+    const el = document.createElement('div');
+    el.className = `toast align-items-center text-bg-${variant} border-0 position-fixed start-50 translate-middle-x shadow`;
+    const nav = document.querySelector('.navbar.sticky-top');
+    const offset = (nav ? nav.getBoundingClientRect().height : 56) + 12;
+    el.style.top = offset + 'px';
+    el.setAttribute('role','alert');
+    el.innerHTML = `<div class="d-flex">
+      <div class="toast-body">${esc(msg)}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>`;
+    document.body.appendChild(el);
+    const t = new bootstrap.Toast(el, { delay: 1600 });
+    t.show(); setTimeout(()=> el.remove(), 2200);
+  }
+
+  const setToken = (email, token, remember=true) => {
+    const store = remember ? localStorage : sessionStorage;
+    store.setItem('auth_token', token);
+    store.setItem('auth_email', email);
+  };
+  const clearAllAuth = () => {
+    localStorage.removeItem('auth_token'); localStorage.removeItem('auth_email');
+    sessionStorage.removeItem('auth_token'); sessionStorage.removeItem('auth_email');
+  };
+  function genDemoJWT(email){
+    const hdr = btoa(JSON.stringify({ alg:"HS256", typ:"JWT" })).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_');
+    const now = Math.floor(Date.now()/1000);
+    const pl  = btoa(JSON.stringify({ sub: email, iat: now, exp: now + 86400, iss:"eventhub-demo" })).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_');
+    const sig = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+    return `${hdr}.${pl}.${sig}`;
+  }
+  async function sha256(text){
+    const enc = new TextEncoder().encode(text);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  // --- Theme + nav auth UI ---
+  (function initChrome(){
+    if (localStorage.getItem('theme')==='dark') document.body.classList.add('dark');
+    document.getElementById('themeToggle')?.addEventListener('click', ()=>{
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (isLoggedIn()) { loginBtn?.classList.add('d-none'); logoutBtn?.classList.remove('d-none'); }
+    logoutBtn?.addEventListener('click', ()=>{ clearAllAuth(); location.reload(); });
+  })();
+
+  // --- Pass ?next= through to Login link ---
+  (function passthroughNext(){
+    const q = location.search;
+    const a = document.getElementById('toLogin');
+    if (a && q) a.href += q;
+  })();
+
+  // --- Already signed in? ---
+  (function checkAlready(){
+    if(isLoggedIn()){
+      document.getElementById('regForm').classList.add('d-none');
+      document.getElementById('already').classList.remove('d-none');
+    }
+  })();
+
+  // --- Password meter + checklist + toggles ---
+  const passEl = document.getElementById('pass');
+  const pass2El = document.getElementById('pass2');
+  const meter = document.getElementById('meter');
+  const reqList = document.getElementById('reqList');
+
+  function updateChecklist(v){
+    const okLen  = v.length >= 8;
+    const okCase = /[A-Z]/.test(v) && /[a-z]/.test(v);
+    const okNum  = /\d/.test(v);
+    const map = { len:okLen, case:okCase, num:okNum };
+    [...reqList.querySelectorAll('li')].forEach(li=>{
+      const k = li.dataset.rule;
+      li.classList.toggle('ok', !!map[k]);
+      li.querySelector('i').className = map[k] ? 'bi bi-check-circle-fill' : 'bi bi-dot';
+    });
+    const score = (okLen + okCase + okNum);
+    const pct = (score/3)*100;
+    meter.style.width = pct + '%';
+    meter.className = 'progress-bar ' + (score<=1 ? 'bg-danger' : score===2 ? 'bg-warning' : 'bg-success');
+  }
+  passEl.addEventListener('input', ()=> updateChecklist(passEl.value));
+
+  document.getElementById('togglePass').addEventListener('click', ()=>{
+    const t = passEl.getAttribute('type') === 'password' ? 'text' : 'password';
+    passEl.setAttribute('type', t);
+    const ic = document.querySelector('#togglePass i'); ic.classList.toggle('bi-eye'); ic.classList.toggle('bi-eye-slash');
+  });
+  document.getElementById('togglePass2').addEventListener('click', ()=>{
+    const t = pass2El.getAttribute('type') === 'password' ? 'text' : 'password';
+    pass2El.setAttribute('type', t);
+    const ic = document.querySelector('#togglePass2 i'); ic.classList.toggle('bi-eye'); ic.classList.toggle('bi-eye-slash');
+  });
+
+  // --- Email uniqueness check across both keys ---
+  const emailEl = document.getElementById('email');
+  emailEl.addEventListener('blur', ()=>{
+    const list = getUsers();
+    if(list.some(u => (u.email||'').toLowerCase() === emailEl.value.trim().toLowerCase())){
+      emailEl.setCustomValidity('This email is already registered.');
+    } else {
+      emailEl.setCustomValidity('');
+    }
+    emailEl.reportValidity();
+  });
+
+  // --- Submit handler ---
+  const NEXT = new URLSearchParams(location.search).get('next') || 'dashboard.html';
+  document.getElementById('regForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const errors = [];
+
+    const fullName = document.getElementById('fullName').value.trim();
+    const address  = document.getElementById('address').value.trim();
+    const email    = emailEl.value.trim();
+    const phone    = document.getElementById('phone').value.trim();
+    const pass     = passEl.value;
+    const pass2    = pass2El.value;
+    const terms    = document.getElementById('terms').checked;
+
+    if(!e.currentTarget.checkValidity()) errors.push('Please fill all required fields with valid information.');
+    if(pass !== pass2){ errors.push('Passwords do not match.'); pass2El.setCustomValidity('Passwords do not match.'); } else { pass2El.setCustomValidity(''); }
+
+    const list = getUsers();
+    if(list.some(u => (u.email||'').toLowerCase() === email.toLowerCase())){
+      errors.push('This email is already registered.'); emailEl.setCustomValidity('This email is already registered.');
+    } else { emailEl.setCustomValidity(''); }
+
+    if(!terms) errors.push('Please agree to the terms of use.');
+
+    const box = document.getElementById('formErrors');
+    if(errors.length){
+      box.classList.remove('d-none'); box.innerHTML = errors.map(x=>`<div>${esc(x)}</div>`).join('');
+      box.focus(); return;
+    } else { box.classList.add('d-none'); box.innerHTML = ''; }
+
+    // store user (demo: password hash)
+    const passHash = await sha256(pass);
+    const newUser = { id: crypto.randomUUID ? crypto.randomUUID() : Date.now(), fullName, address, email, phone, passHash, createdAt: Date.now() };
+    const merged = [...list, newUser];
+    saveUsers(merged);
+
+    // create session + redirect
+    const token = genDemoJWT(email);
+    setToken(email, token, true);
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('msg').classList.remove('d-none');
+    toast('Registration successful!', 'success');
+    setTimeout(()=>{ location.href = NEXT; }, 900);
+  });
+</script>
+</body>
+</html>

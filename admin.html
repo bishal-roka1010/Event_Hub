@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EventHub — Admin</title>
+<meta name="author" content="Your Team" />
+<meta name="description" content="EventHub — discover, filter, and RSVP to local events.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="assets/css/styles.css" />
+<style>
+/* ---- Theme: match login/register ---- */
+.page-bg{
+  background:
+    radial-gradient(1000px 380px at -10% -10%, rgba(99,102,241,.18), transparent),
+    radial-gradient(900px 360px at 110% -10%, rgba(236,72,153,.18), transparent),
+    linear-gradient(180deg, rgba(20,184,166,.06), transparent);
+}
+
+/* ---- Cards & polish ---- */
+.card.hoverable{ transition:transform .2s ease, box-shadow .2s ease }
+.card.hoverable:hover{ transform:translateY(-4px); box-shadow:0 14px 40px rgba(0,0,0,.1) }
+.helper{ font-size:.875rem }
+.stat{
+  border-radius: 1rem; padding: .9rem 1rem; background: rgba(255,255,255,.66);
+  box-shadow: 0 8px 30px rgba(0,0,0,.06); border: 1px solid rgba(0,0,0,.06);
+}
+.stat i{ opacity:.9 }
+.badge-soft{ background: rgba(99,102,241,.12); color:#4f46e5; border:1px solid rgba(99,102,241,.18) }
+.toolbar .form-control,.toolbar .form-select,.toolbar .btn{ height:42px }
+.table thead th{ white-space:nowrap; position: sticky; top: 0; z-index:2; background: var(--bs-body-bg); }
+.table-hover tbody tr:hover{ background-color: rgba(99,102,241,.05) }
+
+/* ---- Empty & skeleton ---- */
+.empty-state{
+  border:1px dashed rgba(0,0,0,.15); border-radius:.75rem; padding:2rem; background: rgba(255,255,255,.6);
+}
+.skeleton{ position:relative; overflow:hidden; background: #eef0f6; border-radius:.5rem; min-height: 56px }
+.skeleton::after{
+  content:""; position:absolute; inset:0; transform:translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent);
+  animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer{ 100%{ transform: translateX(100%); } }
+
+/* ---- Small utilities ---- */
+.icon-btn{ width: 38px; height:38px; display:flex; align-items:center; justify-content:center }
+.icon-btn[disabled]{ pointer-events:none; opacity:.6 }
+</style>
+</head>
+<body class="page-bg">
+<header class="navbar navbar-expand-lg bg-body-tertiary shadow-sm sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Event<span class="text-primary">Hub</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <nav id="nav" class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+        <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="manual.html">Contact</a></li>
+        <li class="nav-item"><a class="nav-link active" aria-current="page" href="admin.html">Admin</a></li>
+      </ul>
+      <div class="d-flex gap-2">
+        <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button">Theme</button>
+        <a id="loginBtn" href="login.html" class="btn btn-primary btn-sm">Login</a>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none" type="button">Logout</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="container py-4">
+  <!-- Header / Stats -->
+  <div class="card hoverable shadow-sm mb-3">
+    <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <h1 class="h5 mb-1">Admin Console <span class="badge badge-soft align-middle ms-1"><i class="bi bi-lock-fill me-1"></i>Read-only</span></h1>
+        <p class="text-muted mb-0 helper">Review events and RSVPs. Actions are disabled.</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <div class="stat d-flex align-items-center gap-2">
+          <i class="bi bi-calendar-event text-primary"></i>
+          <div class="small text-muted">Events</div><div id="statEvents" class="fw-semibold">0</div>
+        </div>
+        <div class="stat d-flex align-items-center gap-2">
+          <i class="bi bi-geo-alt text-success"></i>
+         <div class="small text-muted">Venues</div><div id="statVenues" class="fw-semibold">0</div>
+        </div>
+        <div class="stat d-flex align-items-center gap-2">
+          <i class="bi bi-tags text-warning"></i>
+          <div class="small text-muted">Categories</div><div id="statCats" class="fw-semibold">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="card hoverable shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row g-2 align-items-center toolbar">
+        <div class="col-lg-5">
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input id="admSearch" class="form-control" placeholder="Search title, venue, or keyword">
+            <button id="clearSearch" class="btn btn-outline-secondary" type="button" title="Clear"><i class="bi bi-x-lg"></i></button>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+          <select id="admCategory" class="form-select" title="Category">
+            <option value="">All categories</option>
+          </select>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="input-group" title="Date range">
+            <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+            <input id="admStart" type="date" class="form-control">
+            <span class="input-group-text">—</span>
+            <input id="admEnd" type="date" class="form-control">
+          </div>
+        </div>
+        <div class="col-lg-2 d-flex justify-content-lg-end gap-2">
+          <button id="refreshBtn" class="btn btn-outline-primary"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+          <button class="btn btn-outline-secondary" type="button" id="exportBtn" title="Export CSV (demo)" disabled><i class="bi bi-download"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card hoverable shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Title</th>
+              <th>Date</th>
+              <th>Venue</th>
+              <th>Category</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admintable"></tbody>
+        </table>
+      </div>
+
+      <!-- Skeleton placeholder (auto-hides when data arrives) -->
+      <div id="skeletonRows" class="mt-2">
+        <div class="skeleton mb-2"></div>
+        <div class="skeleton mb-2"></div>
+        <div class="skeleton mb-2"></div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="emptyState" class="empty-state text-center d-none">
+        <i class="bi bi-inboxes fs-2 d-block mb-2"></i>
+        <div class="fw-semibold mb-1">No events found</div>
+        <div class="text-muted helper">Adjust filters or clear your search query.</div>
+      </div>
+
+      <!-- Pager -->
+      <div class="d-flex align-items-center justify-content-between mt-3">
+        <small class="text-muted">Showing <span id="pageFrom">0</span>–<span id="pageTo">0</span> of <span id="pageTotal">0</span></small>
+        <div class="btn-group">
+          <button id="prevPage" class="btn btn-outline-secondary btn-sm"><i class="bi bi-chevron-left"></i></button>
+          <button id="nextPage" class="btn btn-outline-secondary btn-sm"><i class="bi bi-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-muted small mt-2">Add/Update/Delete are disabled.</p>
+</main>
+
+<footer class="border-top mt-5">
+  <div class="container py-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <span class="fs-5 fw-bold">Event<span class="text-primary">Hub</span></span>
+      <span class="text-muted">• “Seamless Events, Unforgettable Experiences”</span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <a class="text-decoration-none" href="manual.html"><i class="bi bi-life-preserver me-1"></i>Help</a>
+      <a class="text-decoration-none" href="about.html"><i class="bi bi-people me-1"></i>About</a>
+      <a class="text-decoration-none" href="event.html"><i class="bi bi-calendar-event me-1"></i>Events</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Preview Modal (read-only) -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="previewTitle" class="modal-title">Event preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div id="previewBody" class="modal-body">
+        <!-- populated by admin-page.js or the glue below -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Site scripts (unchanged) -->
+<script type="module" src="assets/js/site.js"></script>
+<script type="module" src="assets/js/pages/admin-page.js"></script>
+
+<!-- Minimal UX glue: non-breaking helpers to complement your admin-page.js -->
+<script>
+(function adminUX(){
+  const tbl = document.getElementById('admintable');
+  const empty = document.getElementById('emptyState');
+  const skel = document.getElementById('skeletonRows');
+  const search = document.getElementById('admSearch');
+  const clearBtn = document.getElementById('clearSearch');
+  clearBtn?.addEventListener('click', ()=>{ search.value=''; search.dispatchEvent(new Event('input')); });
+
+  // Hide skeleton when rows appear; toggle empty state
+  const observer = new MutationObserver(()=>{
+    const hasRows = !!tbl.querySelector('tr');
+    skel.classList.toggle('d-none', hasRows);
+    empty.classList.toggle('d-none', hasRows);
+  });
+  observer.observe(tbl, { childList:true });
+
+  // Let admin-page.js broadcast stats/paging via a custom event
+  window.addEventListener('admin:stats', (e)=>{
+    const d = e.detail || {};
+    ['statEvents','statVenues','statCats','pageFrom','pageTo','pageTotal'].forEach(id=>{
+      if(d[id.replace('stat','').toLowerCase()]===undefined && d[id]===undefined) return;
+    });
+    if('events' in d) document.getElementById('statEvents').textContent = d.events;
+    if('venues' in d) document.getElementById('statVenues').textContent = d.venues;
+    if('categories' in d) document.getElementById('statCats').textContent = d.categories;
+    if('pageFrom' in d) document.getElementById('pageFrom').textContent = d.pageFrom;
+    if('pageTo' in d) document.getElementById('pageTo').textContent = d.pageTo;
+    if('pageTotal' in d) document.getElementById('pageTotal').textContent = d.pageTotal;
+  });
+
+  // Optional: wire a generic preview action (read-only)
+  window.addEventListener('admin:preview', (e)=>{
+    const { title, html } = e.detail || {};
+    document.getElementById('previewTitle').textContent = title || 'Event preview';
+    document.getElementById('previewBody').innerHTML = html || '<p class="text-muted mb-0">No preview available.</p>';
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    modal.show();
+  });
+
+  // Refresh relay for your page script to pick up
+  document.getElementById('refreshBtn')?.addEventListener('click', ()=>{
+    window.dispatchEvent(new Event('admin:refresh'));
+  });
+})();
+</script>
+</body>
+</html>

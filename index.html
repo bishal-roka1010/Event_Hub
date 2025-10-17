@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EventHub — Home</title>
+<meta name="author" content="Your Team" />
+<meta name="description" content="EventHub — discover, filter, and RSVP to local events.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="assets/css/styles.css" />
+
+<style>
+/* --- Tasteful flair on top of your base styles.css --- */
+
+/* Animated gradient hero with floating blobs */
+.hero-animated {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(1100px 480px at 15% 10%, rgba(79,70,229,.18), transparent),
+              radial-gradient(900px 420px at 85% 15%, rgba(236,72,153,.18), transparent),
+              linear-gradient(180deg, rgba(20,184,166,.08), transparent);
+}
+.blob {
+  position:absolute; filter: blur(30px); opacity:.55; border-radius:50%;
+  animation: float 16s ease-in-out infinite;
+}
+.blob.b1{ width:380px;height:380px; background:#22d3ee; left:-60px; top:-60px; animation-delay:-2s;}
+.blob.b2{ width:320px;height:320px; background:#a78bfa; right:-80px; top:40px; animation-delay:-5s;}
+.blob.b3{ width:260px;height:260px; background:#f472b6; left:40%; bottom:-120px; animation-delay:-8s;}
+@keyframes float {
+  0%,100%{ transform: translateY(0) }
+  50% { transform: translateY(-18px) }
+}
+
+/* Fancy CTA buttons */
+.btn-hero {
+  padding:.85rem 1.25rem; font-weight:600; border-radius:1rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+}
+.btn-hero-primary{
+  background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
+  color:#fff !important; border:0;
+}
+.btn-hero-primary:hover{ transform: translateY(-1px); }
+.btn-hero-ghost{ border:1px solid rgba(0,0,0,.12) }
+
+/* Chips */
+.chip { border:1px solid rgba(0,0,0,.12); padding:.35rem .6rem; border-radius:999px; cursor:pointer; }
+.chip.active { background: var(--brand-primary); color:#fff; border-color: transparent; }
+
+/* Ticker */
+.ticker {
+  --speed: 32s;
+  overflow:hidden; white-space:nowrap; border-radius:.75rem; border:1px solid rgba(0,0,0,.08);
+  background: rgba(0,0,0,.02);
+}
+.ticker-track { display:inline-block; padding: .5rem 0; animation: marquee var(--speed) linear infinite; }
+@keyframes marquee { from{ transform:translateX(0) } to{ transform:translateX(-50%) } }
+.ticker-item { display:inline-flex; align-items:center; gap:.4rem; margin-right:1.25rem; color:#475569; }
+
+/* Cards */
+.card.hoverable { transition: transform .2s ease, box-shadow .2s ease; }
+.card.hoverable:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(0,0,0,.10); }
+
+/* Countdown widget */
+.kpi { font-variant: tabular-nums; }
+
+/* Color theme dots */
+.theme-dot { width:28px; height:28px; border-radius:50%; border:2px solid #fff; outline:2px solid rgba(0,0,0,.15); cursor:pointer; }
+.theme-dot.active { outline-color: var(--brand-primary); }
+
+/* Toast safety */
+.toast{ z-index:2000; }
+
+/* Dark tweaks */
+.dark .ticker{ background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.06) }
+.dark .chip{ border-color: rgba(255,255,255,.2) }
+</style>
+</head>
+<body>
+<header class="navbar navbar-expand-lg bg-body-tertiary shadow-sm sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Event<span class="text-primary">Hub</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <nav id="nav" class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+        <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="manual.html">Contact Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-3">
+        <!-- Quick palette switcher -->
+        <div class="d-none d-md-flex align-items-center gap-2">
+          <div class="theme-dot" data-theme="indigo" style="background:linear-gradient(45deg,#4f46e5,#14b8a6)"></div>
+          <div class="theme-dot" data-theme="cyber"  style="background:linear-gradient(45deg,#06b6d4,#ec4899)"></div>
+          <div class="theme-dot" data-theme="sunny"  style="background:linear-gradient(45deg,#f59e0b,#10b981)"></div>
+        </div>
+        <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button">Theme</button>
+        <a id="loginBtn" href="register.html" class="btn btn-primary btn-sm">Login</a>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none" type="button">Logout</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="container py-4">
+
+  <!-- HERO -->
+  <section class="p-5 mb-4 rounded-3 hero-animated">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+    <div class="position-relative">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-7">
+          <h1 class="display-6 fw-bold">Find unforgettable events. <span class="text-primary">Tonight</span>, this week, and beyond.</h1>
+          <p class="fs-5 text-muted">“We plan, design, and manage events that leave lasting impressions. From corporate conferences to weddings, we make it stress-free and memorable.”</p>
+          <!-- Hero search (builds URL params for event.html) -->
+          <form id="homeSearch" class="row row-cols-1 row-cols-md-4 g-2 mt-2" onsubmit="return false">
+            <div class="col">
+              <label class="form-label">From</label>
+              <input id="fromHome" type="date" class="form-control">
+            </div>
+            <div class="col">
+              <label class="form-label">To</label>
+              <input id="toHome" type="date" class="form-control">
+            </div>
+            <div class="col">
+              <label class="form-label">Keyword</label>
+              <input id="qHome" type="text" class="form-control" placeholder="Title or venue">
+            </div>
+            <div class="col">
+              <label class="form-label">Category</label>
+              <select id="catHome" class="form-select">
+                <option value="">All</option>
+              </select>
+            </div>
+          </form>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <a id="goEvents" href="event.html" class="btn btn-hero btn-hero-primary">
+              <i class="bi bi-search-heart"></i> Find events
+            </a>
+            <a id="surpriseBtn" class="btn btn-hero btn-hero-ghost">
+              <i class="bi bi-magic"></i> Surprise me
+            </a>
+            <button id="shareBtn" class="btn btn-hero btn-hero-ghost">
+              <i class="bi bi-share"></i> Share
+            </button>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <!-- Countdown to the nearest upcoming event -->
+          <div class="card shadow-sm text-center">
+            <div class="card-body">
+              <div class="text-muted">Next starts in</div>
+              <div class="display-6 fw-bold kpi" id="countDown">— : — : —</div>
+              <div class="small text-muted"><span id="countMeta">Finding the next event…</span></div>
+            </div>
+          </div>
+          <!-- Animated stats -->
+          <div class="row g-3 mt-1">
+            <div class="col-4"><div class="card text-center"><div class="card-body">
+              <div class="h3 fw-bold" id="statEvents">0</div><div class="text-muted small">Events</div>
+            </div></div></div>
+            <div class="col-4"><div class="card text-center"><div class="card-body">
+              <div class="h3 fw-bold" id="statCats">0</div><div class="text-muted small">Categories</div>
+            </div></div></div>
+            <div class="col-4"><div class="card text-center"><div class="card-body">
+              <div class="h3 fw-bold" id="statVenues">0</div><div class="text-muted small">Venues</div>
+            </div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker mb-4" aria-label="Upcoming ticker">
+    <div class="ticker-track" id="tickerTrack">
+      <!-- duplicated content for seamless loop -->
+    </div>
+    <div class="ticker-track" id="tickerTrack2"></div>
+  </div>
+
+  <!-- TRENDING CHIPS -->
+  <section class="mb-3">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <h2 class="h5 mb-0">Trending now</h2>
+      <small class="text-muted" id="trendingHint">loading…</small>
+    </div>
+    <div id="chips" class="d-flex flex-wrap gap-2 mt-2"></div>
+  </section>
+
+  <!-- FEATURED -->
+  <section class="mb-4" id="featuredWrap" aria-live="polite">
+    <h2 class="h5 mb-3">Featured this week</h2>
+    <div id="featured" class="card hoverable d-none">
+      <div class="row g-0">
+        <div class="col-md-4">
+          <div class="skel h-100 w-100" id="featuredSkel" style="min-height:220px;border-top-left-radius:.5rem;border-bottom-left-radius:.5rem"></div>
+          <img id="featuredImg" src="" alt="" class="img-fluid rounded-start d-none" style="object-fit:cover;height:100%;width:100%">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h3 class="h5" id="featuredTitle">Loading…</h3>
+            <p class="text-muted mb-2" id="featuredMeta"></p>
+            <p class="mb-3" id="featuredDesc"></p>
+            <a id="featuredLink" href="#" class="btn btn-primary btn-sm">View details</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- UPCOMING -->
+  <div class="d-flex align-items-center justify-content-between">
+    <h2 class="h5">Upcoming Events</h2>
+    <a href="event.html" class="btn btn-outline-secondary btn-sm">View all</a>
+  </div>
+  <div id="upcoming" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mt-1">
+    <!-- skeletons -->
+    <div class="col"><div class="card h-100 hoverable"><div class="skel h150 rounded-top-2"></div><div class="card-body"><div class="skel h20 rounded-8 mb-2"></div><div class="skel h20 rounded-8" style="width:60%"></div></div></div></div>
+    <div class="col"><div class="card h-100 hoverable"><div class="skel h150 rounded-top-2"></div><div class="card-body"><div class="skel h20 rounded-8 mb-2"></div><div class="skel h20 rounded-8" style="width:60%"></div></div></div></div>
+    <div class="col"><div class="card h-100 hoverable"><div class="skel h150 rounded-top-2"></div><div class="card-body"><div class="skel h20 rounded-8 mb-2"></div><div class="skel h20 rounded-8" style="width:60%"></div></div></div></div>
+  </div>
+
+  <!-- WHY EVENTHUB -->
+  <section class="mt-4">
+    <h2 class="h5 mb-3">Why choose EventHub</h2>
+    <div class="row g-3">
+      <div class="col-md-4"><div class="card hoverable h-100"><div class="card-body">
+        <i class="bi bi-fire fs-3 text-primary"></i>
+        <h3 class="h6 mt-2">End-to-End Event Solutions</h3>
+        <p class="text-muted mb-0">We handle everything—from planning, design, and logistics to flawless execution.</p>
+      </div></div></div>
+      <div class="col-md-4"><div class="card hoverable h-100"><div class="card-body">
+        <i class="bi bi-shield-check fs-3 text-primary"></i>
+        <h3 class="h6 mt-2">Trusted by Clients</h3>
+        <p class="text-muted mb-0">From weddings to corporate events, we’ve earned a reputation for delivering excellence.</p>
+      </div></div></div>
+      <div class="col-md-4"><div class="card hoverable h-100"><div class="card-body">
+        <i class="bi bi-rocket-takeoff fs-3 text-primary"></i>
+        <h3 class="h6 mt-2">Experienced Team</h3>
+        <p class="text-muted mb-0">Our dedicated planners bring years of expertise and creativity to make your event stress-free.</p>
+      </div></div></div>
+    </div>
+  </section>
+</main>
+
+<footer class="border-top mt-5">
+  <div class="container py-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <span class="fs-5 fw-bold">Event<span class="text-primary">Hub</span></span>
+      <span class="text-muted">• “Seamless Events, Unforgettable Experiences”</span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <a class="text-decoration-none" href="manual.html"><i class="bi bi-life-preserver me-1"></i>Help</a>
+      <a class="text-decoration-none" href="about.html"><i class="bi bi-people me-1"></i>About</a>
+      <a class="text-decoration-none" href="event.html"><i class="bi bi-calendar-event me-1"></i>Events</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Page script -->
+<script type="module">
+  // Helpers
+  const esc = (s='') => String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+  const isLoggedIn = () => !!localStorage.getItem('auth_token');
+
+  function toast(msg){
+    const el = document.createElement('div');
+    el.className = 'toast align-items-center text-bg-primary border-0 position-fixed start-50 translate-middle-x shadow';
+    el.style.zIndex = '2000';
+    const nav = document.querySelector('.navbar.sticky-top');
+    const offset = (nav ? nav.getBoundingClientRect().height : 56) + 12;
+    el.style.top = offset + 'px';
+    el.setAttribute('role','alert');
+    el.innerHTML = `<div class="d-flex">
+        <div class="toast-body">${esc(msg)}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>`;
+    document.body.appendChild(el);
+    const t = new bootstrap.Toast(el, { delay: 1500 });
+    t.show(); setTimeout(()=> el.remove(), 2200);
+  }
+
+  // Confetti micro-interaction (emoji burst)
+  function confettiBurst(x=window.innerWidth/2, y=80){
+    const EMO = ['🎉','✨','🎈','💫','🎊'];
+    for(let i=0;i<16;i++){
+      const s = document.createElement('span');
+      s.textContent = EMO[Math.floor(Math.random()*EMO.length)];
+      s.style.position='fixed';
+      s.style.left = (x + (Math.random()*120-60))+'px';
+      s.style.top  = (y + (Math.random()*20-10))+'px';
+      s.style.fontSize = (Math.random()*16+16)+'px';
+      s.style.pointerEvents = 'none';
+      s.style.transition='transform 900ms ease-out, opacity 900ms ease-out';
+      document.body.appendChild(s);
+      requestAnimationFrame(()=>{ s.style.transform=`translateY(-80px) rotate(${Math.random()*90-45}deg)`; s.style.opacity='0'; });
+      setTimeout(()=> s.remove(), 950);
+    }
+  }
+
+  // Theme + auth + palette presets
+  (function initChrome(){
+    const btn = document.getElementById('themeToggle');
+    if (localStorage.getItem('theme')==='dark') document.body.classList.add('dark');
+    btn?.addEventListener('click', ()=>{
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (isLoggedIn()) { loginBtn?.classList.add('d-none'); logoutBtn?.classList.remove('d-none'); }
+    logoutBtn?.addEventListener('click', ()=>{ localStorage.removeItem('auth_token'); localStorage.removeItem('auth_email'); location.reload(); });
+
+    // Palette dots -> update CSS variables (affects whole site)
+    const palettes = {
+      indigo: { '--brand-primary':'#4f46e5', '--brand-accent':'#14b8a6' },
+      cyber:  { '--brand-primary':'#06b6d4', '--brand-accent':'#ec4899' },
+      sunny:  { '--brand-primary':'#f59e0b', '--brand-accent':'#10b981' },
+    };
+    function applyPalette(name){
+      const p = palettes[name] || palettes.indigo;
+      Object.entries(p).forEach(([k,v])=> document.documentElement.style.setProperty(k, v));
+      localStorage.setItem('palette', name);
+      document.querySelectorAll('.theme-dot').forEach(d=> d.classList.toggle('active', d.dataset.theme===name));
+    }
+    document.querySelectorAll('.theme-dot').forEach(dot=>{
+      dot.addEventListener('click', ()=> applyPalette(dot.dataset.theme));
+    });
+    applyPalette(localStorage.getItem('palette') || 'indigo');
+  })();
+
+  // Hero form → build link to Events with params
+  const fromHome = document.getElementById('fromHome');
+  const toHome   = document.getElementById('toHome');
+  const qHome    = document.getElementById('qHome');
+  const catHome  = document.getElementById('catHome');
+  const goEvents = document.getElementById('goEvents');
+  function updateEventsLink(){
+    const params = new URLSearchParams();
+    if(fromHome.value) params.set('from', fromHome.value);
+    if(toHome.value)   params.set('to', toHome.value);
+    if(qHome.value)    params.set('q', qHome.value.trim());
+    if(catHome.value)  params.set('cat', catHome.value);
+    goEvents.href = 'event.html' + (params.toString()? ('?'+params.toString()) : '');
+  }
+  [fromHome,toHome,qHome,catHome].forEach(el => el.addEventListener('input', updateEventsLink));
+
+  // Surprise me: open random event details
+  const surpriseBtn = document.getElementById('surpriseBtn');
+
+  // Share
+  const shareBtn = document.getElementById('shareBtn');
+  shareBtn.addEventListener('click', async ()=>{
+    const url = location.href;
+    if (navigator.share) { try{ await navigator.share({ title:'EventHub', url }); } catch {} }
+    else { await navigator.clipboard.writeText(url); toast('Link copied'); }
+  });
+
+  // Data: fill categories, stats, countdown, featured, upcoming, chips & ticker
+  const upcomingEl = document.getElementById('upcoming');
+  const featuredCard = document.getElementById('featured');
+  const featuredImg  = document.getElementById('featuredImg');
+  const featuredSkel = document.getElementById('featuredSkel');
+  const featuredTitle= document.getElementById('featuredTitle');
+  const featuredMeta = document.getElementById('featuredMeta');
+  const featuredDesc = document.getElementById('featuredDesc');
+  const featuredLink = document.getElementById('featuredLink');
+  const countMeta = document.getElementById('countMeta');
+  const countDown = document.getElementById('countDown');
+  const statEvents = document.getElementById('statEvents');
+  const statCats   = document.getElementById('statCats');
+  const statVenues = document.getElementById('statVenues');
+  const chips = document.getElementById('chips');
+  const trendingHint = document.getElementById('trendingHint');
+  const tick1 = document.getElementById('tickerTrack');
+  const tick2 = document.getElementById('tickerTrack2');
+
+  fetch('./data/events.json').then(r=>r.json()).then(data=>{
+    const events = [...data].sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+    // Fill category select
+    const cats = [...new Set(events.map(e=>e.category).filter(Boolean))].sort();
+    catHome.innerHTML = '<option value="">All</option>' + cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+    updateEventsLink();
+
+    // Stats
+    animateCount(statEvents, events.length);
+    animateCount(statCats, cats.length);
+    animateCount(statVenues, new Set(events.map(e=>e.venue)).size);
+
+    // Countdown to the nearest upcoming (with time if present)
+    const nowISO = new Date().toISOString().slice(0,10);
+    const next = events.find(e => e.date >= nowISO) || events[0];
+    if(next){
+      countMeta.textContent = `${next.title} — ${next.venue} • ${next.date}${next.time?' • '+next.time:''}`;
+      startCountdown(next.date, next.time || '00:00');
+    }
+
+    // Featured = earliest upcoming
+    const feat = next;
+    if (feat){
+      featuredTitle.textContent = feat.title;
+      featuredMeta.textContent = `${feat.venue} • ${feat.date}${feat.time? ' • '+feat.time:''}`;
+      featuredDesc.textContent = feat.description || '';
+      featuredLink.href = `details.html?id=${encodeURIComponent(feat.id)}`;
+      featuredImg.src = feat.image; featuredImg.alt = `Poster of ${feat.title}`;
+      featuredSkel.classList.add('d-none'); featuredImg.classList.remove('d-none'); featuredCard.classList.remove('d-none');
+    }
+
+    // Upcoming: next 3
+    const next3 = events.slice(0,3);
+    upcomingEl.innerHTML = next3.map(e => cardHtml(e)).join('');
+
+    // Trending chips (by category frequency)
+    const freq = Object.fromEntries(cats.map(c=>[c, 0]));
+    events.forEach(e=>{ if(e.category && e.date >= nowISO) freq[e.category]++; });
+    const trending = cats.sort((a,b)=> (freq[b]||0)-(freq[a]||0)).slice(0,6);
+    chips.innerHTML = trending.map(c => `<span class="chip" data-cat="${esc(c)}"><i class="bi bi-hash"></i> ${esc(c)}</span>`).join('');
+    document.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', ()=>{
+      document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+      ch.classList.add('active');
+      catHome.value = ch.getAttribute('data-cat') || '';
+      updateEventsLink();
+      confettiBurst(window.innerWidth/2, 110);
+      setTimeout(()=> location.href = goEvents.href, 300);
+    }));
+    trendingHint.textContent = 'tap a chip to filter';
+
+    // Ticker
+    const items = events.slice(0,10).map(e => `<span class="ticker-item"><i class="bi bi-megaphone"></i> ${esc(e.title)} • ${esc(e.date)}</span>`).join('');
+    tick1.innerHTML = items; tick2.innerHTML = items;
+
+    // Surprise
+    surpriseBtn.addEventListener('click', ()=>{
+      const e = events[Math.floor(Math.random()*events.length)];
+      confettiBurst();
+      setTimeout(()=> location.href = `details.html?id=${encodeURIComponent(e.id)}`, 550);
+    });
+  }).catch(()=>{
+    upcomingEl.innerHTML = '<div class="col-12"><div class="alert alert-danger">Failed to load events.</div></div>';
+  });
+
+  // build cards
+  function cardHtml(e){
+    return `
+      <div class="col">
+        <div class="card h-100 hoverable">
+          <img src="${esc(e.image)}" class="card-img-top" alt="Poster of ${esc(e.title)}" style="object-fit:cover;height:180px">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">${esc(e.title)}</h5>
+              <span class="badge bg-secondary ms-2">${esc(e.category || 'General')}</span>
+            </div>
+            <p class="card-text text-muted mt-2"><i class="bi bi-geo-alt"></i> ${esc(e.venue)} · ${esc(e.date)}</p>
+            <a class="btn btn-sm btn-primary" href="details.html?id=${encodeURIComponent(e.id)}">View</a>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function animateCount(el, target){
+    const dur = 900, start = performance.now();
+    function step(now){
+      const p = Math.min(1, (now-start)/dur);
+      el.textContent = Math.floor(p*target);
+      if(p<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function startCountdown(dateISO, timeHHMM){
+    function parseLocalISO(d,t){
+      // Build local time Date
+      const [Y,M,D] = d.split('-').map(Number);
+      const [h,m] = (t||'00:00').split(':').map(Number);
+      return new Date(Y, M-1, D, h||0, m||0, 0);
+    }
+    const target = parseLocalISO(dateISO, timeHHMM);
+    function tick(){
+      const ms = target - new Date();
+      if(ms <= 0){ countDown.textContent = '00:00:00'; return; }
+      const s = Math.floor(ms/1000);
+      const h = String(Math.floor(s/3600)).padStart(2,'0');
+      const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+      const ss= String(s%60).padStart(2,'0');
+      countDown.textContent = `${h}:${m}:${ss}`;
+      requestAnimationFrame(tick);
+    }
+    tick();
+  }
+
+  // Keep events link in sync initially
+  updateEventsLink();
+</script>
+</body>
+</html>

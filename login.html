@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EventHub — Login</title>
+<meta name="author" content="Your Team" />
+<meta name="description" content="EventHub — discover, filter, and RSVP to local events.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="assets/css/styles.css" />
+<style>
+/* Page theming */
+.page-bg{
+  background:
+    radial-gradient(1000px 380px at -10% -10%, rgba(99,102,241,.18), transparent),
+    radial-gradient(900px 360px at 110% -10%, rgba(236,72,153,.18), transparent),
+    linear-gradient(180deg, rgba(20,184,166,.06), transparent);
+}
+.card.hoverable{ transition:transform .2s ease, box-shadow .2s ease }
+.card.hoverable:hover{ transform:translateY(-4px); box-shadow:0 14px 40px rgba(0,0,0,.1) }
+.input-group .btn{ border-top-left-radius:0;border-bottom-left-radius:0 }
+.progress.xs{ height:.4rem }
+.toast{ z-index:2000 }
+.helper{ font-size:.875rem }
+</style>
+</head>
+<body class="page-bg">
+<header class="navbar navbar-expand-lg bg-body-tertiary shadow-sm sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Event<span class="text-primary">Hub</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <nav id="nav" class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+        <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="manual.html">Contact Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+      </ul>
+      <div class="d-flex gap-2">
+        <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button">Theme</button>
+        <a id="loginBtn" href="login.html" class="btn btn-primary btn-sm">Login</a>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none" type="button">Logout</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card hoverable shadow-sm">
+        <div class="card-body p-4 p-md-5">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h1 class="h4 mb-0">Welcome back</h1>
+           
+          </div>
+          <p class="text-muted helper mb-4">Use any valid email and an 8+ character password to sign in.</p>
+
+          <form id="loginForm" novalidate>
+            <div id="formErrors" class="alert alert-danger d-none" role="alert" aria-live="assertive"></div>
+
+            <label class="form-label" for="email">Email</label>
+            <input id="email" name="email" type="email" class="form-control" autocomplete="email" required>
+
+            <label class="form-label mt-3" for="pass">Password</label>
+            <div class="input-group">
+              <input id="pass" name="pass" type="password" class="form-control" minlength="8" placeholder="••••••••" autocomplete="current-password" required>
+              <button class="btn btn-outline-secondary" type="button" id="togglePass" aria-label="Show password"><i class="bi bi-eye"></i></button>
+            </div>
+            <div class="progress xs mt-2" aria-hidden="true">
+              <div id="meter" class="progress-bar" role="progressbar" style="width:0%"></div>
+            </div>
+            <div id="meterHelp" class="form-text">Password strength</div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="remember">
+                <label class="form-check-label" for="remember">Remember me</label>
+              </div>
+              <button type="button" class="btn btn-link btn-sm p-0" data-bs-toggle="modal" data-bs-target="#forgotModal">Forgot password?</button>
+            </div>
+
+            <button id="submitBtn" class="btn btn-primary w-100 mt-4" type="submit">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Login
+            </button>
+            <p id="msg" class="text-success mt-3 d-none" aria-live="polite">Logged in. Redirecting…</p>
+            <p class="mt-3 helper">No account? <a href="register.html">Register here</a>.</p>
+          </form>
+
+          <div id="already" class="mt-3 d-none">
+            <div class="alert alert-success d-flex align-items-center" role="alert">
+              <i class="bi bi-check-circle me-2"></i>
+              You are already logged in.
+            </div>
+            <a class="btn btn-outline-primary" href="dashboard.html"><i class="bi bi-person"></i> Go to Dashboard</a>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</main>
+
+<footer class="border-top mt-5">
+  <div class="container py-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <span class="fs-5 fw-bold">Event<span class="text-primary">Hub</span></span>
+      <span class="text-muted">• “Seamless Events, Unforgettable Experiences”</span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <a class="text-decoration-none" href="manual.html"><i class="bi bi-life-preserver me-1"></i>Help</a>
+      <a class="text-decoration-none" href="about.html"><i class="bi bi-people me-1"></i>About</a>
+      <a class="text-decoration-none" href="event.html"><i class="bi bi-calendar-event me-1"></i>Events</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Forgot password (demo) -->
+<div class="modal fade" id="forgotModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Reset password (Demo)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <label class="form-label" for="resetEmail">Enter your email</label>
+        <input id="resetEmail" type="email" class="form-control" placeholder="you@example.com">
+        <small class="text-muted">This will just show a confirmation toast in the demo.</small>
+      </div>
+      <div class="modal-footer">
+        <button id="sendReset" type="button" class="btn btn-primary">Send reset link</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Page script (self-contained) -->
+<script type="module">
+  // ---------- Helpers ----------
+  const esc = (s='') => String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+  const isLoggedIn = () => !!(localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token'));
+  const setToken = (email, token, remember) => {
+    const store = remember ? localStorage : sessionStorage;
+    store.setItem('auth_token', token);
+    store.setItem('auth_email', email);
+  };
+  const clearAllAuth = () => {
+    localStorage.removeItem('auth_token'); localStorage.removeItem('auth_email');
+    sessionStorage.removeItem('auth_token'); sessionStorage.removeItem('auth_email');
+  };
+  const getNext = () => new URLSearchParams(location.search).get('next') || 'dashboard.html';
+
+  function toast(msg, variant='primary'){
+    const el = document.createElement('div');
+    el.className = `toast align-items-center text-bg-${variant} border-0 position-fixed start-50 translate-middle-x shadow`;
+    el.style.zIndex = '2000';
+    const nav = document.querySelector('.navbar.sticky-top');
+    const offset = (nav ? nav.getBoundingClientRect().height : 56) + 12; // below sticky navbar
+    el.style.top = offset + 'px';
+    el.setAttribute('role','alert');
+    el.innerHTML = `<div class="d-flex">
+      <div class="toast-body">${esc(msg)}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>`;
+    document.body.appendChild(el);
+    const t = new bootstrap.Toast(el, { delay: 1600 });
+    t.show(); setTimeout(()=> el.remove(), 2200);
+  }
+
+  function genDemoJWT(email){
+    // Tiny demo token: base64url(header).base64url(payload).signature
+    const hdr = btoa(JSON.stringify({ alg:"HS256", typ:"JWT" })).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_');
+    const now = Math.floor(Date.now()/1000);
+    const pl  = btoa(JSON.stringify({ sub: email, iat: now, exp: now + 86400, iss:"eventhub-demo" })).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_');
+    const sig = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+    return `${hdr}.${pl}.${sig}`;
+  }
+
+  // ---------- Theme + nav auth UI ----------
+  (function initChrome(){
+    if (localStorage.getItem('theme')==='dark') document.body.classList.add('dark');
+    document.getElementById('themeToggle')?.addEventListener('click', ()=>{
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (isLoggedIn()) { loginBtn?.classList.add('d-none'); logoutBtn?.classList.remove('d-none'); }
+    logoutBtn?.addEventListener('click', ()=>{ clearAllAuth(); location.reload(); });
+  })();
+
+  // ---------- Prefill helpers ----------
+  (function prefill(){
+    const params = new URLSearchParams(location.search);
+    const email = params.get('email');
+    if(email) document.getElementById('email').value = email;
+  })();
+
+  // ---------- If already logged in ----------
+  (function checkAlready(){
+    if(isLoggedIn()){
+      document.getElementById('loginForm').classList.add('d-none');
+      document.getElementById('already').classList.remove('d-none');
+    }
+  })();
+
+  // ---------- Password meter ----------
+  const passEl = document.getElementById('pass');
+  const meter  = document.getElementById('meter');
+  const meterHelp = document.getElementById('meterHelp');
+  passEl.addEventListener('input', ()=>{
+    const v = passEl.value;
+    let score = 0;
+    if(v.length >= 8) score++;
+    if(/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+    if(/\d/.test(v)) score++;
+    if(/[^A-Za-z0-9]/.test(v)) score++;
+    const pct = (score/4)*100;
+    meter.style.width = pct + '%';
+    meter.className = 'progress-bar ' + (score<=1 ? 'bg-danger' : score===2 ? 'bg-warning' : 'bg-success');
+    meterHelp.textContent = score<=1 ? 'Weak' : score===2 ? 'Medium' : 'Strong';
+  });
+
+  // Show/hide password
+  document.getElementById('togglePass').addEventListener('click', ()=>{
+    const type = passEl.getAttribute('type') === 'password' ? 'text' : 'password';
+    passEl.setAttribute('type', type);
+    const icon = document.querySelector('#togglePass i');
+    icon.classList.toggle('bi-eye');
+    icon.classList.toggle('bi-eye-slash');
+  });
+
+  // ---------- Forgot password (demo) ----------
+  document.getElementById('sendReset').addEventListener('click', ()=>{
+    const v = document.getElementById('resetEmail').value.trim();
+    const modal = bootstrap.Modal.getInstance(document.getElementById('forgotModal'));
+    modal?.hide();
+    if(!v){ toast('Enter a valid email', 'warning'); return; }
+    toast('Password reset link sent (demo). Check your email.');
+  });
+
+  // ---------- Form submit ----------
+  document.getElementById('loginForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const email = document.getElementById('email');
+    const pass  = document.getElementById('pass');
+    const remember = document.getElementById('remember').checked;
+    const errors = [];
+
+    if(!email.checkValidity()) errors.push('Please enter a valid email address.');
+    if(!pass.checkValidity())  errors.push('Password must be at least 8 characters.');
+
+    const box = document.getElementById('formErrors');
+    if(errors.length){
+      box.classList.remove('d-none'); box.innerHTML = errors.map(x=>`<div>${esc(x)}</div>`).join('');
+      box.focus();
+      return;
+    } else {
+      box.classList.add('d-none'); box.innerHTML = '';
+    }
+
+    // Create demo token + persist
+    const token = genDemoJWT(email.value.trim());
+    setToken(email.value.trim(), token, remember);
+
+    // UI feedback + redirect
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('msg').classList.remove('d-none');
+    toast('Logged in successfully!', 'success');
+
+    setTimeout(()=>{ location.href = getNext(); }, 1000);
+  });
+</script>
+</body>
+</html>

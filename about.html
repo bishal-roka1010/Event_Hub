@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EventHub — About</title>
+<meta name="author" content="Your Team" />
+<meta name="description" content="EventHub — discover, filter, and RSVP to local events.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="assets/css/styles.css" />
+<style>
+.hero{background:
+  radial-gradient(900px 360px at 0% 0%, rgba(79,70,229,.18), transparent),
+  radial-gradient(900px 360px at 100% 0%, rgba(236,72,153,.18), transparent),
+  linear-gradient(180deg, rgba(20,184,166,.08), transparent);}
+.card.hoverable{transition:transform .2s ease, box-shadow .2s ease}
+.card.hoverable:hover{transform:translateY(-4px); box-shadow:0 14px 40px rgba(0,0,0,.1)}
+.badge-soft{background:rgba(13,110,253,.12); color:#0d6efd;}
+.toast{z-index:2000}
+.copy-box{background:rgba(0,0,0,.02); border:1px solid rgba(0,0,0,.06); border-radius:.75rem; padding:1rem}
+.table thead th{white-space:nowrap}
+.section-lead{max-width:72ch}
+</style>
+</head>
+<body>
+<header class="navbar navbar-expand-lg bg-body-tertiary shadow-sm sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Event<span class="text-primary">Hub</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <nav id="nav" class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+        <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link active" aria-current="page" href="about.html">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="manual.html">Contact Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+      </ul>
+      <div class="d-flex gap-2">
+        <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button">Theme</button>
+        <!-- use register.html if you don't have a dedicated login page -->
+        <a id="loginBtn" href="register.html" class="btn btn-primary btn-sm">Login</a>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none" type="button">Logout</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="container py-4">
+
+  <!-- HERO -->
+  <section class="p-4 p-md-5 mb-4 rounded-3 hero">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-8">
+        <span class="badge badge-soft mb-2"><i class="bi bi-info-circle"></i> About this project</span>
+        <h1 class="h3 fw-bold mb-2">EventHub — ICT203 Assessment Build</h1>
+        <p class="text-muted mb-0 section-lead">
+          A frontend application that delivers Home, Events Listing, Event Details (with RSVP), Registration,
+          and a personal Dashboard — built with Bootstrap and vanilla JavaScript, using <code>localStorage</code> for demo persistence.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        <button id="printBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-printer"></i> Print / Save PDF</button>
+        <button id="copySummary" class="btn btn-outline-secondary btn-sm"><i class="bi bi-clipboard"></i> Copy Summary</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM (names + student IDs) -->
+  <section class="mb-4">
+    <h2 class="h5 mb-2">Team Members</h2>
+    
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr><th>#</th><th>Name</th><th>Student ID</th><th>Role / Contribution</th></tr>
+        </thead>
+        <tbody id="teamTable">
+          <tr><td>1</td><td><strong>Sandesh Karki</strong></td><td>CIHE240900</td><td>Frontend Lead — navigation, page wiring, Data & QA — <code>events.json</code></td></tr>
+          <tr><td>2</td><td><strong>Seema Thapa</strong></td><td>CIHE23978</td><td>UI/UX — responsive design, accessibility, micro-interactions, RSVP logic, testing.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- REQUIRED WRITE-UPS (1–3 paragraphs each) -->
+  <section class="mb-4">
+    <h2 class="h5 mb-2">Work Distribution & Roles</h2>
+    <p class="section-lead">
+      We divided the project by strengths to keep velocity and quality high. Member A (Frontend Lead) set up the
+      HTML structure, routing across pages, and <code>events.json</code> schema, client-side RSVP
+      storage in <code>localStorage</code>. Member B (UI/UX)
+      focused on visual design and interaction polish: responsive layouts, accessible semantics, skeleton loading states,
+      and consistent patterns for toasts and modals. Both members contributed to testing and bug fixes.
+    <p class="section-lead">
+      Collaboration happened in small iterations: we groomed tasks together, kept a checklist for acceptance criteria,
+      and performed lightweight code reviews before merging. 
+    </p>
+  </section>
+
+  <section class="mb-4">
+    <h2 class="h5 mb-2">Project Highlights</h2>
+    <p class="section-lead">
+      The most exciting part is the end-to-end user flow that feels “real” even without a backend. The Home page
+      includes a hero search with date pickers and categories, a featured event, live stats, and delightful touches
+      (chips, ticker, countdown). The Events Listing supports grid/list views, keyword search, category/date filters,
+      sorting, favorites, and pagination. On the Event Details page, users see a large poster, a map embed, a clear
+      summary, an RSVP button with accessible feedback, and a small public demo attendee list.
+    </p>
+    <p class="section-lead">
+      The Dashboard consolidates a user’s registrations, adds exports (JSON/CSV) and calendar (.ics) downloads,
+      and provides simple analytics (counts, sparkline, achievements). Across the app we prioritized accessibility:
+      semantic headings, alt text, aria-live regions for dynamic updates, and safe HTML escaping to prevent injection.
+      All of this is wrapped in a modern, responsive design that maintains performance on mobile.
+    </p>
+  </section>
+
+  <section class="mb-4">
+    <h2 class="h5 mb-2">Challenges Faced</h2>
+    <p class="section-lead">
+      Our biggest challenges were mostly integration details. First, getting sticky headers to play nicely with
+      notifications — we initially had success toasts rendering under the navbar; we resolved this by positioning
+      toasts below the measured navbar height. Second, date/time handling varied across browsers, so we normalized
+      comparisons using ISO date strings and carefully built local Date objects for countdowns and calendar exports.
+    </p>
+    <p class="section-lead">
+       Finally, keeping paths consistent in a local Apache/XAMPP setup required attention to
+      relative URLs and folder names to avoid 404s when moving between pages.
+    </p>
+  </section>
+
+  <!-- REFERENCES & CREDITS -->
+  <section class="mb-4">
+    <h2 class="h5 mb-2">References & Credits (Assets Used)</h2>
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="card hoverable h-100">
+          <div class="card-body">
+            <h3 class="h6">Frameworks, Icons, Fonts</h3>
+            <ul class="mb-0">
+              <li>
+                <strong>Bootstrap 5.3.3</strong> — CSS & JS via jsDelivr CDN.
+                <div class="text-muted small">License: MIT · URL: https://getbootstrap.com/</div>
+              </li>
+              <li class="mt-2">
+                <strong>Bootstrap Icons 1.11.3</strong> — Icon font via jsDelivr.
+                <div class="text-muted small">License: MIT · URL: https://icons.getbootstrap.com/</div>
+              </li>
+              <li class="mt-2">
+                <strong>System UI font stack</strong> (provided by Bootstrap):
+                <code>-apple-system, Segoe UI, Roboto, Helvetica, Arial, system-ui</code>
+                <div class="text-muted small">No external font files added.</div>
+              </li>
+              <li class="mt-2">
+                <strong>Google Maps (embed)</strong> — Event location map via iframe.
+                <div class="text-muted small">Terms: https://maps.google.com/</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Auto-inventory of image sources -->
+      <div class="col-lg-6">
+        <div class="card hoverable h-100">
+          <div class="card-body">
+            <h3 class="h6">Images & Media</h3>
+            <p class="mb-2 text-muted small">
+             We used images that were royalty-free and easily downloadable without an account. 
+            </p>
+            <ul id="imageRefs" class="mb-0"><li class="text-muted">Scanning dataset…</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card hoverable mt-3">
+      <div class="card-body">
+        <h3 class="h6 mb-2">Additional Notes</h3>
+        <div class="copy-box">
+          <ul class="mb-0">
+            <li><strong>Data file:</strong> <code>./data/events.json</code> (team-authored).</li>
+            <li><strong>Session (demo):</strong> <code>auth_token</code>, <code>auth_email</code> stored in <code>localStorage</code>.</li>
+            <li><strong>RSVP store:</strong> <code>rsvps</code> (array of <code>{eventId,email,at}</code>).</li>
+            <li><strong>Preferences:</strong> <code>theme</code>, <code>palette</code>, <code>favs</code>.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="border-top mt-5">
+  <div class="container py-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <span class="fs-5 fw-bold">Event<span class="text-primary">Hub</span></span>
+      <span class="text-muted">• “Seamless Events, Unforgettable Experiences”</span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <a class="text-decoration-none" href="manual.html"><i class="bi bi-life-preserver me-1"></i>Help</a>
+      <a class="text-decoration-none" href="about.html"><i class="bi bi-people me-1"></i>About</a>
+      <a class="text-decoration-none" href="event.html"><i class="bi bi-calendar-event me-1"></i>Events</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Page script (self-contained) -->
+<script type="module">
+  // Helpers
+  const esc = (s='') => String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+  const isLoggedIn = () => !!localStorage.getItem('auth_token');
+
+  function toast(msg){
+    const el = document.createElement('div');
+    el.className = 'toast align-items-center text-bg-primary border-0 position-fixed start-50 translate-middle-x shadow';
+    el.style.zIndex = '2000';
+    const nav = document.querySelector('.navbar.sticky-top');
+    const offset = (nav ? nav.getBoundingClientRect().height : 56) + 12; // below sticky navbar
+    el.style.top = offset + 'px';
+    el.setAttribute('role','alert');
+    el.innerHTML = `<div class="d-flex">
+        <div class="toast-body">${esc(msg)}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>`;
+    document.body.appendChild(el);
+    const t = new bootstrap.Toast(el, { delay: 1500 });
+    t.show(); setTimeout(()=> el.remove(), 2200);
+  }
+
+  // Theme + auth UI
+  (function initChrome(){
+    if (localStorage.getItem('theme')==='dark') document.body.classList.add('dark');
+    document.getElementById('themeToggle')?.addEventListener('click', ()=>{
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (isLoggedIn()) { loginBtn?.classList.add('d-none'); logoutBtn?.classList.remove('d-none'); }
+    logoutBtn?.addEventListener('click', ()=>{ localStorage.removeItem('auth_token'); localStorage.removeItem('auth_email'); location.reload(); });
+  })();
+
+  // Copy summary
+  document.getElementById('copySummary')?.addEventListener('click', async ()=>{
+    const text = `
+EventHub — ICT203 Assessment Build.
+Pages: Home, Events, Event Details (with RSVP), Registration, Dashboard.
+Tech: Bootstrap 5.3.3, Bootstrap Icons 1.11.3, vanilla JS. Data in ./data/events.json.
+Demo session & RSVPs stored in localStorage.
+    `.trim();
+    try{ await navigator.clipboard.writeText(text); toast('Summary copied'); }catch{ toast('Copy failed'); }
+  });
+
+  // Print
+  document.getElementById('printBtn')?.addEventListener('click', ()=> window.print());
+
+  // Auto-inventory image references from data/events.json
+  (async function(){
+    const ul = document.getElementById('imageRefs');
+    try{
+      const res = await fetch('./data/events.json');
+      const data = await res.json();
+      const urls = [...new Set((data||[]).map(e => e.image).filter(Boolean))];
+
+      if(urls.length === 0){ ul.innerHTML = '<li class="text-muted">No image URLs found in dataset.</li>'; return; }
+
+      // group by hostname and show sample filenames
+      const groups = {};
+      for(const u of urls){
+        try{
+          const url = new URL(u, location.href);
+          const host = url.hostname || '(relative path)';
+          const file = url.pathname.split('/').pop() || url.pathname;
+          (groups[host] ||= []).push(file);
+        }catch{
+          (groups['(relative path)'] ||= []).push(u);
+        }
+      }
+
+      ul.innerHTML = Object.entries(groups).map(([host, files]) => {
+        const uniq = [...new Set(files)];
+        return `<li><strong>${esc(host)}</strong> — ${uniq.length} image(s)
+          <div class="text-muted small">Examples: ${esc(uniq.slice(0,3).join(', '))}${uniq.length>3?' …':''}</div>
+          
+        </li>`;
+      }).join('');
+    }catch{
+      ul.innerHTML = '<li class="text-danger">Could not scan events.json. Ensure the file exists at ./data/events.json.</li>';
+    }
+  })();
+</script>
+</body>
+</html>

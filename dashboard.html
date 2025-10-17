@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EventHub — Dashboard</title>
+<meta name="author" content="Your Team" />
+<meta name="description" content="EventHub — discover, filter, and RSVP to local events.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="assets/css/styles.css" />
+<style>
+/* --- tasteful enhancements --- */
+.card.hoverable{ transition:transform .2s ease, box-shadow .2s ease }
+.card.hoverable:hover{ transform:translateY(-4px); box-shadow:0 14px 40px rgba(0,0,0,.10) }
+.kpi{ font-variant:tabular-nums }
+.toolbar{ position:sticky; top:72px; z-index:10; background:var(--bs-body-bg); border:1px solid rgba(0,0,0,.06); border-radius:.75rem; padding:.75rem }
+.view-toggle .btn{ border-radius:999px }
+.segment .btn{ border-radius:999px }
+.toast{ z-index:2000 }
+.skel{ background:linear-gradient(90deg, rgba(0,0,0,.06), rgba(0,0,0,.1), rgba(0,0,0,.06)); background-size:200% 100%; animation:shimmer 1.2s infinite }
+@keyframes shimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.badge-soft{ background: rgba(13,110,253,.1); color:#0d6efd; }
+.badge-success-soft{ background: rgba(25,135,84,.12); color:#198754; }
+.badge-warning-soft{ background: rgba(255,193,7,.18); color:#b17400; }
+.list-avatar{ width:84px;height:56px;object-fit:cover;border-radius:.5rem }
+svg.spark{ width:100%; height:60px }
+.dark .toolbar{ border-color:rgba(255,255,255,.1) }
+</style>
+</head>
+<body>
+<header class="navbar navbar-expand-lg bg-body-tertiary shadow-sm sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Event<span class="text-primary">Hub</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <nav id="nav" class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+        <li class="nav-item"><a class="nav-link active" aria-current="page" href="dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="manual.html">Contact Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+      </ul>
+      <div class="d-flex gap-2">
+        <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button">Theme</button>
+        <a id="loginBtn" href="register.html" class="btn btn-primary btn-sm">Login</a>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none" type="button">Logout</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="container py-4">
+
+  <!-- Tabs -->
+  <ul class="nav nav-pills mb-3" id="dashTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="tab-overview" data-bs-toggle="pill" data-bs-target="#pane-overview" type="button" role="tab">Overview</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-rsvps" data-bs-toggle="pill" data-bs-target="#pane-rsvps" type="button" role="tab">My RSVPs</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-favs" data-bs-toggle="pill" data-bs-target="#pane-favs" type="button" role="tab">Favorites</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-history" data-bs-toggle="pill" data-bs-target="#pane-history" type="button" role="tab">History</button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+
+    <!-- OVERVIEW -->
+    <div class="tab-pane fade show active" id="pane-overview" role="tabpanel">
+      <div class="row g-3">
+        <div class="col-md-3"><div class="card hoverable text-center"><div class="card-body">
+          <div class="text-muted small">Total RSVPs</div><div id="ovTotal" class="display-6 fw-bold kpi">0</div>
+        </div></div></div>
+        <div class="col-md-3"><div class="card hoverable text-center"><div class="card-body">
+          <div class="text-muted small">Upcoming</div><div id="ovUpcoming" class="display-6 fw-bold kpi">0</div>
+        </div></div></div>
+        <div class="col-md-3"><div class="card hoverable text-center"><div class="card-body">
+          <div class="text-muted small">Venues</div><div id="ovVenues" class="display-6 fw-bold kpi">0</div>
+        </div></div></div>
+        <div class="col-md-3"><div class="card hoverable text-center"><div class="card-body">
+          <div class="text-muted small">Categories</div><div id="ovCats" class="display-6 fw-bold kpi">0</div>
+        </div></div></div>
+      </div>
+
+      <div class="row g-3 mt-1">
+        <div class="col-lg-8">
+          <div class="card hoverable">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Next 6 months</h5>
+                <span class="badge badge-soft"><i class="bi bi-activity"></i> RSVPs / month</span>
+              </div>
+              <svg class="spark mt-2" id="spark"></svg>
+              <small class="text-muted">A glance at how busy your calendar looks.</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card hoverable h-100">
+            <div class="card-body">
+              <h5 class="card-title">Achievements</h5>
+              <ul id="achievements" class="list-unstyled mb-0">
+                <!-- filled by JS -->
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RSVPs -->
+    <div class="tab-pane fade" id="pane-rsvps" role="tabpanel">
+      <!-- Toolbar -->
+      <div class="toolbar mt-2">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label">Search</label>
+            <input id="q" class="form-control" placeholder="Title or venue…">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">From</label>
+            <input id="from" type="date" class="form-control">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">To</label>
+            <input id="to" type="date" class="form-control">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Sort</label>
+            <select id="sort" class="form-select">
+              <option value="dateAsc">Date ↑</option>
+              <option value="dateDesc">Date ↓</option>
+              <option value="title">Title</option>
+              <option value="venue">Venue</option>
+            </select>
+          </div>
+          <div class="col-md-3 d-flex justify-content-md-end align-items-center gap-2">
+            <div class="btn-group segment" role="group" aria-label="Scope">
+              <input type="radio" class="btn-check" name="scope" id="scopeAll" checked>
+              <label class="btn btn-outline-secondary" for="scopeAll">All</label>
+              <input type="radio" class="btn-check" name="scope" id="scopeUpcoming">
+              <label class="btn btn-outline-secondary" for="scopeUpcoming">Upcoming</label>
+              <input type="radio" class="btn-check" name="scope" id="scopePast">
+              <label class="btn btn-outline-secondary" for="scopePast">Past</label>
+            </div>
+            <div class="btn-group view-toggle" role="group" aria-label="View">
+              <button id="viewGrid" class="btn btn-outline-secondary active" type="button" title="Grid"><i class="bi bi-grid"></i></button>
+              <button id="viewList" class="btn btn-outline-secondary" type="button" title="List"><i class="bi bi-list"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-2">
+          <small id="resultInfo" class="text-muted">Loading…</small>
+          <div class="btn-group" role="group" aria-label="Bulk actions">
+            <button id="addAllIcs" class="btn btn-outline-secondary btn-sm"><i class="bi bi-calendar-plus"></i> Add all to calendar</button>
+            <button id="exportJson" class="btn btn-outline-secondary btn-sm"><i class="bi bi-filetype-json"></i> JSON</button>
+            <button id="exportCsv"  class="btn btn-outline-secondary btn-sm"><i class="bi bi-filetype-csv"></i> CSV</button>
+            <button id="printBtn"   class="btn btn-outline-secondary btn-sm"><i class="bi bi-printer"></i> Print</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="grid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mt-2"></div>
+      <div id="list" class="list-group mt-2 d-none"></div>
+      <div id="emptyRsvp" class="text-center text-muted p-5 d-none">
+        <i class="bi bi-emoji-smile fs-1"></i>
+        <p class="mt-2 mb-3">You haven’t registered for any events yet.</p>
+        <a class="btn btn-primary" href="event.html"><i class="bi bi-search"></i> Explore events</a>
+      </div>
+    </div>
+
+    <!-- FAVORITES -->
+    <div class="tab-pane fade" id="pane-favs" role="tabpanel">
+      <div id="favWrap" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mt-1"></div>
+      <div id="emptyFav" class="text-center text-muted p-5 d-none">
+        <i class="bi bi-star fs-1"></i>
+        <p class="mt-2 mb-3">Mark some events as favorites to see them here.</p>
+        <a class="btn btn-outline-secondary" href="event.html"><i class="bi bi-grid"></i> Browse events</a>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="tab-pane fade" id="pane-history" role="tabpanel">
+      <div id="history" class="list-group mt-1"></div>
+      <div id="emptyHist" class="text-center text-muted p-5 d-none">
+        <i class="bi bi-journal-check fs-1"></i>
+        <p class="mt-2 mb-0">No past events yet.</p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="border-top mt-5">
+  <div class="container py-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <span class="fs-5 fw-bold">Event<span class="text-primary">Hub</span></span>
+      <span class="text-muted">• “Seamless Events, Unforgettable Experiences”</span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <a class="text-decoration-none" href="manual.html"><i class="bi bi-life-preserver me-1"></i>Help</a>
+      <a class="text-decoration-none" href="about.html"><i class="bi bi-people me-1"></i>About</a>
+      <a class="text-decoration-none" href="event.html"><i class="bi bi-calendar-event me-1"></i>Events</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Page script (self-contained) -->
+<script type="module">
+  // ---------- Helpers ----------
+  const esc = (s='') => String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+  const isLoggedIn = () => !!localStorage.getItem('auth_token');
+  const authEmail  = () => localStorage.getItem('auth_email') || '';
+  const RSVP_KEY = 'rsvps';
+  const FAV_KEY  = 'favs';
+
+  function toast(msg){
+    const el = document.createElement('div');
+    el.className = 'toast align-items-center text-bg-primary border-0 position-fixed start-50 translate-middle-x shadow';
+    el.style.zIndex = '2000';
+    const nav = document.querySelector('.navbar.sticky-top');
+    const offset = (nav ? nav.getBoundingClientRect().height : 56) + 12;
+    el.style.top = offset + 'px';
+    el.setAttribute('role','alert');
+    el.innerHTML = `<div class="d-flex"><div class="toast-body">${esc(msg)}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>`;
+    document.body.appendChild(el);
+    const t = new bootstrap.Toast(el, { delay: 1500 });
+    t.show(); setTimeout(()=> el.remove(), 2200);
+  }
+
+  // Theme + auth
+  (function initChrome(){
+    const btn = document.getElementById('themeToggle');
+    if (localStorage.getItem('theme')==='dark') document.body.classList.add('dark');
+    btn?.addEventListener('click', ()=>{
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (isLoggedIn()) { loginBtn?.classList.add('d-none'); logoutBtn?.classList.remove('d-none'); }
+    logoutBtn?.addEventListener('click', ()=>{ localStorage.removeItem('auth_token'); localStorage.removeItem('auth_email'); location.reload(); });
+  })();
+
+  // ---------- State ----------
+  let events = [];
+  let joined = []; // my RSVPs joined with event data
+  let view = 'grid'; // grid/list for RSVPs
+  let scope = 'all'; // all/upcoming/past
+
+  // DOM refs (RSVPs)
+  const els = {
+    // overview
+    ovTotal: document.getElementById('ovTotal'),
+    ovUpcoming: document.getElementById('ovUpcoming'),
+    ovVenues: document.getElementById('ovVenues'),
+    ovCats: document.getElementById('ovCats'),
+    spark: document.getElementById('spark'),
+    achievements: document.getElementById('achievements'),
+    // rsvps
+    grid: document.getElementById('grid'),
+    list: document.getElementById('list'),
+    emptyRsvp: document.getElementById('emptyRsvp'),
+    resultInfo: document.getElementById('resultInfo'),
+    q: document.getElementById('q'),
+    from: document.getElementById('from'),
+    to: document.getElementById('to'),
+    sort: document.getElementById('sort'),
+    scopeAll: document.getElementById('scopeAll'),
+    scopeUpcoming: document.getElementById('scopeUpcoming'),
+    scopePast: document.getElementById('scopePast'),
+    viewGrid: document.getElementById('viewGrid'),
+    viewList: document.getElementById('viewList'),
+    addAllIcs: document.getElementById('addAllIcs'),
+    exportJson: document.getElementById('exportJson'),
+    exportCsv: document.getElementById('exportCsv'),
+    printBtn: document.getElementById('printBtn'),
+    // favorites
+    favWrap: document.getElementById('favWrap'),
+    emptyFav: document.getElementById('emptyFav'),
+    // history
+    hist: document.getElementById('history'),
+    emptyHist: document.getElementById('emptyHist'),
+  };
+
+  // ---------- Data load ----------
+  fetch('./data/events.json').then(r=>r.json()).then(data=>{
+    events = data;
+    refreshAll();
+  }).catch(()=>{
+    els.grid.innerHTML = '<div class="col-12"><div class="alert alert-danger">Failed to load events.</div></div>';
+  });
+
+  function getMyRsvps(){
+    const email = authEmail();
+    const all = JSON.parse(localStorage.getItem(RSVP_KEY) || '[]');
+    return all.filter(x => x.email === email);
+  }
+  function joinRsvps(){
+    const rsvps = getMyRsvps();
+    joined = rsvps.map(r => {
+      const e = events.find(ev => String(ev.id)===String(r.eventId));
+      return e ? { ...e, __rsvpAt: r.at } : null;
+    }).filter(Boolean);
+  }
+
+  // ---------- OVERVIEW ----------
+  function renderOverview(){
+    const today = new Date().toISOString().slice(0,10);
+    const upcoming = joined.filter(e => e.date >= today);
+    const venues = new Set(joined.map(e=>e.venue)).size;
+    const cats   = new Set(joined.map(e=>e.category).filter(Boolean)).size;
+    animateCount(els.ovTotal, joined.length);
+    animateCount(els.ovUpcoming, upcoming.length);
+    animateCount(els.ovVenues, venues);
+    animateCount(els.ovCats,   cats);
+    renderSpark();
+    renderAchievements();
+  }
+  function renderSpark(){
+    // counts for next 6 months
+    const now = new Date();
+    const buckets = []; // [{label, y}]
+    for(let i=0;i<6;i++){
+      const d = new Date(now.getFullYear(), now.getMonth()+i, 1);
+      const label = d.toLocaleString(undefined,{month:'short'});
+      const y = joined.filter(e=>{
+        const [Y,M] = e.date.split('-').map(Number);
+        return (Y===d.getFullYear() && M===d.getMonth()+1);
+      }).length;
+      buckets.push({label,y});
+    }
+    const max = Math.max(1, ...buckets.map(b=>b.y));
+    const w = els.spark.clientWidth || 600, h = 60, pad = 6;
+    const step = (w - pad*2) / (buckets.length-1 || 1);
+    const pts = buckets.map((b,i)=>{
+      const x = pad + i*step;
+      const y = h - pad - (b.y/max)*(h - pad*2);
+      return [x,y];
+    });
+    const d = pts.map((p,i)=> (i? 'L':'M') + p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+    els.spark.innerHTML = `
+      <polyline fill="none" stroke="currentColor" stroke-width="2" points="${pts.map(p=>p.join(',')).join(' ')}" opacity=".8"></polyline>
+      <g fill="currentColor" opacity=".9">${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="2.5"></circle>`).join('')}</g>
+    `;
+  }
+  function renderAchievements(){
+    const items = [];
+    // Early Bird: registered 7+ days before event at least once
+    const early = joined.some(e=>{
+      const start = parseLocal(e.date, e.time||'00:00');
+      return (start - new Date(e.__rsvpAt)) >= 7*864e5;
+    });
+    if(early) items.push(`<li class="mb-2"><span class="badge-success-soft badge rounded-pill"><i class="bi bi-alarm"></i> Early Bird</span> <small class="text-muted">You registered well in advance.</small></li>`);
+    // Explorer: 3+ categories
+    const cats = new Set(joined.map(e=>e.category).filter(Boolean)).size;
+    if(cats>=3) items.push(`<li class="mb-2"><span class="badge-soft badge rounded-pill"><i class="bi bi-compass"></i> Explorer</span> <small class="text-muted">${cats} categories</small></li>`);
+    // Venue Hopper: 3+ venues
+    const venues = new Set(joined.map(e=>e.venue)).size;
+    if(venues>=3) items.push(`<li class="mb-2"><span class="badge-warning-soft badge rounded-pill"><i class="bi bi-geo"></i> Venue Hopper</span> <small class="text-muted">${venues} venues</small></li>`);
+    els.achievements.innerHTML = items.join('') || '<li class="text-muted">Attend events to unlock achievements.</li>';
+  }
+
+  // ---------- RSVPs ----------
+  // events
+  els.q.addEventListener('input', renderRsvps);
+  els.from.addEventListener('input', renderRsvps);
+  els.to.addEventListener('input', renderRsvps);
+  els.sort.addEventListener('input', renderRsvps);
+  els.scopeAll.addEventListener('change', ()=>{ scope='all'; renderRsvps(); });
+  els.scopeUpcoming.addEventListener('change', ()=>{ scope='upcoming'; renderRsvps(); });
+  els.scopePast.addEventListener('change', ()=>{ scope='past'; renderRsvps(); });
+  els.viewGrid.addEventListener('click', ()=>{ view='grid'; els.viewGrid.classList.add('active'); els.viewList.classList.remove('active'); renderRsvps(); });
+  els.viewList.addEventListener('click', ()=>{ view='list'; els.viewList.classList.add('active'); els.viewGrid.classList.remove('active'); renderRsvps(); });
+  els.addAllIcs.addEventListener('click', ()=> exportICS(filteredRsvps()));
+  els.exportJson.addEventListener('click', ()=> exportJSON(filteredRsvps()));
+  els.exportCsv.addEventListener('click',  ()=> exportCSV(filteredRsvps()));
+  els.printBtn.addEventListener('click',   ()=> window.print());
+
+  function filteredRsvps(){
+    const term = els.q.value.trim().toLowerCase();
+    const from = els.from.value || null;
+    const to   = els.to.value || null;
+    const today = new Date().toISOString().slice(0,10);
+    let arr = [...joined];
+    if(scope==='upcoming') arr = arr.filter(e=> e.date >= today);
+    if(scope==='past')     arr = arr.filter(e=> e.date <  today);
+    if(term) arr = arr.filter(e=> e.title.toLowerCase().includes(term) || e.venue.toLowerCase().includes(term));
+    if(from) arr = arr.filter(e=> e.date >= from);
+    if(to)   arr = arr.filter(e=> e.date <= to);
+    // sort
+    arr.sort((a,b)=>{
+      switch(els.sort.value){
+        case 'dateDesc': return String(b.date).localeCompare(String(a.date));
+        case 'title':    return a.title.localeCompare(b.title);
+        case 'venue':    return a.venue.localeCompare(b.venue);
+        default:         return String(a.date).localeCompare(String(b.date));
+      }
+    });
+    return arr;
+  }
+
+  function renderRsvps(){
+    const items = filteredRsvps();
+    els.resultInfo.textContent = `${items.length} result${items.length===1?'':'s'}`;
+    if(items.length===0){
+      els.grid.innerHTML = ''; els.list.innerHTML=''; els.emptyRsvp.classList.remove('d-none'); return;
+    }
+    els.emptyRsvp.classList.add('d-none');
+
+    if(view==='grid'){
+      els.list.classList.add('d-none'); els.grid.classList.remove('d-none');
+      els.grid.innerHTML = items.map(cardHtml).join('');
+    } else {
+      els.grid.classList.add('d-none'); els.list.classList.remove('d-none');
+      els.list.innerHTML = items.map(rowHtml).join('');
+    }
+    bindRowActions();
+  }
+
+  function cardHtml(e){
+    const rsvpOn = new Date(e.__rsvpAt).toLocaleDateString();
+    const details = `details.html?id=${encodeURIComponent(e.id)}`;
+    return `
+      <div class="col">
+        <div class="card h-100 hoverable">
+          <img src="${esc(e.image)}" class="card-img-top" alt="Poster of ${esc(e.title)}" style="object-fit:cover;height:180px">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5 class="card-title mb-1">${esc(e.title)}</h5>
+              <span class="badge bg-secondary">${esc(e.category || 'General')}</span>
+            </div>
+            <p class="text-muted mb-2"><i class="bi bi-geo-alt"></i> ${esc(e.venue)} · ${esc(e.date)}${e.time? ' • '+esc(e.time):''}</p>
+            <small class="text-muted mb-3">Registered on ${esc(rsvpOn)}</small>
+            <div class="mt-auto d-flex flex-wrap gap-2">
+              <a class="btn btn-sm btn-primary" href="${details}">Open</a>
+              <button class="btn btn-sm btn-outline-secondary" type="button" data-ics="${esc(e.id)}"><i class="bi bi-calendar2-plus"></i> Add to calendar</button>
+              <button class="btn btn-sm btn-outline-secondary" type="button" data-share="${esc(e.id)}"><i class="bi bi-share"></i> Share</button>
+              <button class="btn btn-sm btn-outline-danger ms-auto" type="button" data-cancel="${esc(e.id)}"><i class="bi bi-x-circle"></i> Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+  function rowHtml(e){
+    const rsvpOn = new Date(e.__rsvpAt).toLocaleDateString();
+    const details = `details.html?id=${encodeURIComponent(e.id)}`;
+    return `
+      <div class="list-group-item d-flex align-items-center">
+        <img src="${esc(e.image)}" alt="" class="list-avatar me-3">
+        <div class="flex-fill">
+          <div class="d-flex justify-content-between align-items-center">
+            <strong>${esc(e.title)}</strong>
+            <span class="badge bg-secondary">${esc(e.category || 'General')}</span>
+          </div>
+          <small class="text-muted"><i class="bi bi-geo-alt"></i> ${esc(e.venue)} · ${esc(e.date)}${e.time? ' • '+esc(e.time):''} • Registered ${esc(rsvpOn)}</small>
+        </div>
+        <div class="ms-3 d-flex align-items-center gap-2">
+          <a class="btn btn-sm btn-primary" href="${details}">Open</a>
+          <button class="btn btn-sm btn-outline-secondary" data-ics="${esc(e.id)}">.ics</button>
+          <button class="btn btn-sm btn-outline-secondary" data-share="${esc(e.id)}">Share</button>
+          <button class="btn btn-sm btn-outline-danger" data-cancel="${esc(e.id)}">Cancel</button>
+        </div>
+      </div>`;
+  }
+  function bindRowActions(){
+    document.querySelectorAll('[data-cancel]').forEach(btn=>{
+      btn.addEventListener('click', ()=> cancelRsvp(btn.getAttribute('data-cancel')));
+    });
+    document.querySelectorAll('[data-ics]').forEach(btn=>{
+      btn.addEventListener('click', ()=> downloadICS(oneICS(findById(btn.getAttribute('data-ics')))));
+    });
+    document.querySelectorAll('[data-share]').forEach(btn=>{
+      btn.addEventListener('click', ()=> shareEvent(findById(btn.getAttribute('data-share'))));
+    });
+  }
+  function findById(id){ return joined.find(x=> String(x.id)===String(id)); }
+  function cancelRsvp(id){
+    const email = authEmail();
+    const all = JSON.parse(localStorage.getItem(RSVP_KEY) || '[]');
+    const next = all.filter(x => !(String(x.eventId)===String(id) && x.email===email));
+    localStorage.setItem(RSVP_KEY, JSON.stringify(next));
+    toast('Registration cancelled'); refreshAll();
+  }
+
+  // ---------- FAVORITES ----------
+  function renderFavs(){
+    const favs = JSON.parse(localStorage.getItem(FAV_KEY) || '[]');
+    const items = events.filter(e => favs.includes(String(e.id)));
+    if(items.length===0){ els.favWrap.innerHTML=''; els.emptyFav.classList.remove('d-none'); return; }
+    els.emptyFav.classList.add('d-none');
+    els.favWrap.innerHTML = items.map(e=>`
+      <div class="col">
+        <div class="card h-100 hoverable">
+          <img src="${esc(e.image)}" class="card-img-top" alt="Poster of ${esc(e.title)}" style="object-fit:cover;height:180px">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">${esc(e.title)}</h5>
+            <p class="text-muted mb-3"><i class="bi bi-geo-alt"></i> ${esc(e.venue)} · ${esc(e.date)}</p>
+            <div class="mt-auto d-flex gap-2">
+              <a class="btn btn-sm btn-primary" href="details.html?id=${encodeURIComponent(e.id)}">Open</a>
+              <a class="btn btn-sm btn-outline-secondary" href="event.html?q=${encodeURIComponent(e.title)}">Find similar</a>
+            </div>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  // ---------- HISTORY ----------
+  function renderHistory(){
+    const today = new Date().toISOString().slice(0,10);
+    const past = joined.filter(e=> e.date < today)
+                       .sort((a,b)=> String(b.date).localeCompare(String(a.date)));
+    if(past.length===0){ els.hist.innerHTML=''; els.emptyHist.classList.remove('d-none'); return; }
+    els.emptyHist.classList.add('d-none');
+    // group by month
+    const groups = {};
+    past.forEach(e=>{
+      const d = new Date(e.date);
+      const key = d.toLocaleString(undefined, { month:'long', year:'numeric' });
+      (groups[key] ||= []).push(e);
+    });
+    const out = [];
+    for(const [month, arr] of Object.entries(groups)){
+      out.push(`<div class="list-group-item active">${esc(month)}</div>`);
+      arr.forEach(e=>{
+        out.push(`
+          <a class="list-group-item list-group-item-action d-flex align-items-center" href="details.html?id=${encodeURIComponent(e.id)}">
+            <img src="${esc(e.image)}" class="list-avatar me-3" alt="">
+            <div class="flex-fill">
+              <div class="d-flex justify-content-between"><strong>${esc(e.title)}</strong><small class="text-muted">${esc(e.date)}</small></div>
+              <small class="text-muted"><i class="bi bi-geo-alt"></i> ${esc(e.venue)}</small>
+            </div>
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a>`);
+      });
+    }
+    els.hist.innerHTML = out.join('');
+  }
+
+  // ---------- Exports / Calendar / Share ----------
+  function exportJSON(items){
+    const data = JSON.stringify(items, null, 2);
+    download('my-events.json', data, 'application/json');
+  }
+  function exportCSV(items){
+    const header = ['Title','Date','Time','Venue','Category','Details URL'];
+    const rows = items.map(e => [e.title, e.date, e.time||'', e.venue, e.category||'', location.origin + location.pathname.replace(/[^/]+$/,'') + `details.html?id=${encodeURIComponent(e.id)}`]);
+    const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+    download('my-events.csv', csv, 'text/csv');
+  }
+  function exportICS(items){
+    if(items.length===0){ toast('Nothing to add'); return; }
+    const ics = fullICS(items);
+    download('my-events.ics', ics, 'text/calendar');
+  }
+  async function shareEvent(e){
+    const url = location.origin + location.pathname.replace(/[^/]+$/,'') + `details.html?id=${encodeURIComponent(e.id)}`;
+    if(navigator.share){ try{ await navigator.share({ title:e.title, url }); }catch{} }
+    else{ await navigator.clipboard.writeText(url); toast('Link copied'); }
+  }
+  function downloadICS(content){
+    download('event.ics', content, 'text/calendar');
+  }
+  function download(name, content, type){
+    const blob = new Blob([content], {type});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=> URL.revokeObjectURL(a.href), 500);
+  }
+
+  function oneICS(e){
+    const start = parseLocal(e.date, e.time||'00:00');
+    const end   = new Date(start.getTime() + 2*60*60*1000);
+    const uid   = `eventhub-${e.id}@local`;
+    const lines = [
+      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//EventHub//EN','BEGIN:VEVENT',
+      `UID:${uid}`,`DTSTAMP:${toUtcStamp(new Date())}`,
+      `DTSTART:${toUtcStamp(start)}`,`DTEND:${toUtcStamp(end)}`,
+      `SUMMARY:${e.title.replace(/[\r\n]/g,' ')}`,
+      `LOCATION:${(e.venue||'').replace(/[\r\n]/g,' ')}`,
+      `DESCRIPTION:${(e.description||'').replace(/[\r\n]/g,' ')}`,
+      `URL:${location.origin + location.pathname.replace(/[^/]+$/,'') + 'details.html?id=' + encodeURIComponent(e.id)}`,
+      'END:VEVENT','END:VCALENDAR'
+    ];
+    return lines.join('\r\n');
+  }
+  function fullICS(items){
+    const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//EventHub//EN'];
+    for(const e of items){
+      const start = parseLocal(e.date, e.time||'00:00');
+      const end   = new Date(start.getTime() + 2*60*60*1000);
+      lines.push('BEGIN:VEVENT');
+      lines.push(`UID:eventhub-${e.id}@local`);
+      lines.push(`DTSTAMP:${toUtcStamp(new Date())}`);
+      lines.push(`DTSTART:${toUtcStamp(start)}`);
+      lines.push(`DTEND:${toUtcStamp(end)}`);
+      lines.push(`SUMMARY:${e.title.replace(/[\r\n]/g,' ')}`);
+      lines.push(`LOCATION:${(e.venue||'').replace(/[\r\n]/g,' ')}`);
+      lines.push(`DESCRIPTION:${(e.description||'').replace(/[\r\n]/g,' ')}`);
+      lines.push(`URL:${location.origin + location.pathname.replace(/[^/]+$/,'') + 'details.html?id=' + encodeURIComponent(e.id)}`);
+      lines.push('END:VEVENT');
+    }
+    lines.push('END:VCALENDAR');
+    return lines.join('\r\n');
+  }
+  function toUtcStamp(d){ return d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z'); }
+  function parseLocal(dateISO, timeHHMM){
+    const [Y,M,D] = dateISO.split('-').map(Number);
+    const [h,m]   = (timeHHMM||'00:00').split(':').map(Number);
+    return new Date(Y, M-1, D, h||0, m||0, 0);
+  }
+  function animateCount(el, target){
+    const from = Number(el.textContent)||0; const start = performance.now(), dur=500;
+    function step(now){ const t=Math.min(1,(now-start)/dur); el.textContent = Math.floor(from+(target-from)*t); if(t<1) requestAnimationFrame(step); }
+    requestAnimationFrame(step);
+  }
+
+  // ---------- Master refresh ----------
+  function refreshAll(){
+    if(!isLoggedIn()){
+      // Gentle prompt
+      document.querySelector('#pane-overview').innerHTML =
+        '<div class="card"><div class="card-body text-center"><p class="mb-2">Please log in to see your dashboard.</p><a class="btn btn-primary" href="register.html">Login / Register</a></div></div>';
+      return;
+    }
+    joinRsvps();
+    // Preload skeleton for RSVPs
+    els.grid.innerHTML = Array.from({length:6}).map(()=>`
+      <div class="col"><div class="card h-100"><div class="skel" style="height:180px"></div><div class="card-body"><div class="skel" style="height:20px;width:60%"></div></div></div></div>
+    `).join('');
+    renderOverview();
+    renderRsvps();
+    renderFavs();
+    renderHistory();
+  }
+
+  // Re-render spark on resize
+  window.addEventListener('resize', ()=>{ if(document.getElementById('pane-overview').classList.contains('active')) renderSpark(); });
+  
+</script>
+</body>
+</html>

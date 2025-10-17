@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EventHub — Details</title>
+<meta name="author" content="Your Team" />
+<meta name="description" content="EventHub — discover, filter, and RSVP to local events.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+<header class="navbar navbar-expand-lg bg-body-tertiary shadow-sm sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Event<span class="text-primary">Hub</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <nav id="nav" class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="event.html">Events</a></li>
+        <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="manual.html">Contact Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+      </ul>
+      <div class="d-flex gap-2">
+        <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button">Theme</button>
+        <!-- point to register.html unless you have a dedicated login.html -->
+        <a id="loginBtn" href="register.html" class="btn btn-primary btn-sm">Login</a>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none" type="button">Logout</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="container py-4">
+  <div id="content" class="row g-4"></div>
+</main>
+
+<footer class="border-top mt-5">
+  <div class="container py-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <span class="fs-5 fw-bold">Event<span class="text-primary">Hub</span></span>
+      <span class="text-muted">• “Seamless Events, Unforgettable Experiences”</span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <a class="text-decoration-none" href="manual.html"><i class="bi bi-life-preserver me-1"></i>Help</a>
+      <a class="text-decoration-none" href="about.html"><i class="bi bi-people me-1"></i>About</a>
+      <a class="text-decoration-none" href="event.html"><i class="bi bi-calendar-event me-1"></i>Events</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Page script (self-contained, no external deps) -->
+<script type="module">
+  // --- Helpers ---
+  const esc = (s='') => String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+  const isLoggedIn = () => !!localStorage.getItem('auth_token');
+  const authEmail  = () => localStorage.getItem('auth_email') || '';
+  const loginHref  = document.getElementById('loginBtn')?.getAttribute('href') || 'register.html';
+
+  function toast(msg){
+    const el = document.createElement('div');
+    // place below sticky navbar; no top-0 class
+    el.className = 'toast align-items-center text-bg-primary border-0 position-fixed start-50 translate-middle-x shadow';
+    el.style.zIndex = '2000';
+    const nav = document.querySelector('.navbar.sticky-top');
+    const offset = (nav ? nav.getBoundingClientRect().height : 56) + 12;
+    el.style.top = offset + 'px';
+    el.setAttribute('role','alert');
+    el.innerHTML = `<div class="d-flex">
+        <div class="toast-body">${esc(msg)}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>`;
+    document.body.appendChild(el);
+    const t = new bootstrap.Toast(el, { delay: 1500 });
+    t.show(); setTimeout(()=> el.remove(), 2200);
+  }
+
+  // Theme + auth UI
+  (function initChrome(){
+    const btn = document.getElementById('themeToggle');
+    if (localStorage.getItem('theme')==='dark') document.body.classList.add('dark');
+    btn?.addEventListener('click', ()=>{
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (isLoggedIn()) { loginBtn?.classList.add('d-none'); logoutBtn?.classList.remove('d-none'); }
+    logoutBtn?.addEventListener('click', ()=>{
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_email');
+      location.reload();
+    });
+  })();
+
+  // RSVP storage (frontend-only)
+  const RSVP_KEY = 'rsvps';
+  const getRsvps = () => JSON.parse(localStorage.getItem(RSVP_KEY) || '[]');
+  const setRsvps = (arr) => localStorage.setItem(RSVP_KEY, JSON.stringify(arr));
+  function addRsvp(eventId, email){
+    const all = getRsvps();
+    if (all.some(x => x.eventId===eventId && x.email===email)) return false;
+    all.push({ eventId, email, at: Date.now() }); setRsvps(all); return true;
+  }
+
+  // Mask email for public attendee list
+  function maskEmail(email){
+    email = String(email||''); const i = email.indexOf('@');
+    if(i<0) return email;
+    const name = email.slice(0,i), dom = email.slice(i+1);
+    const shown = name.slice(0,2) + '***';
+    const parts = dom.split('.');
+    const domMasked = (parts[0] ? parts[0][0]+'***' : '***') + (parts.length>1?'.'+parts[parts.length-1]:'');
+    return shown + '@' + domMasked;
+  }
+
+  // Render page
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  const container = document.getElementById('content');
+
+  if(!id){
+    container.innerHTML = '<div class="col-12"><div class="alert alert-danger">Missing event ID.</div></div>';
+  }else{
+    // skeleton
+    container.innerHTML = `
+      <div class="col-md-6"><div class="skel h150 rounded-3"></div></div>
+      <div class="col-md-6">
+        <div class="skel h20 rounded-3 mb-2"></div>
+        <div class="skel h20 rounded-3" style="width:60%"></div>
+      </div>`;
+
+    fetch('./data/events.json').then(r=>r.json()).then(events=>{
+      const e = events.find(x=> String(x.id)===String(id));
+      if(!e){ container.innerHTML = '<div class="col-12"><div class="alert alert-danger">Event not found.</div></div>'; return; }
+
+      // Optional bits
+      const catHtml = e.category ? `<span class="badge bg-secondary ms-2">${esc(e.category)}</span>` : '';
+      const hasMap = typeof e.lat === 'number' && typeof e.lng === 'number';
+      const mapHtml = hasMap
+        ? `<div class="ratio ratio-16x9 mb-3">
+             <iframe src="https://maps.google.com/maps?q=${e.lat},${e.lng}&z=15&output=embed" title="Map"></iframe>
+           </div>`
+        : `<div class="alert alert-warning" role="alert">Map location is unavailable for this event.</div>`;
+
+      container.innerHTML = `
+        <div class="col-md-6">
+          <img src="${esc(e.image)}" class="img-fluid rounded" alt="Poster of ${esc(e.title)}">
+        </div>
+        <div class="col-md-6">
+          <h1 class="h3 mb-1">${esc(e.title)} ${catHtml}</h1>
+          <p class="text-muted mb-2">${esc(e.venue)} — ${esc(e.location || '')} — ${esc(e.date)} ${esc(e.time || '')}</p>
+          <p>${esc(e.description)}</p>
+
+          ${mapHtml}
+
+          <div class="d-flex gap-2 flex-wrap">
+            <button id="rsvp" class="btn btn-primary">
+              <i class="bi bi-ticket-perforated"></i> Register / RSVP
+            </button>
+            <button id="copyLink" class="btn btn-outline-secondary">
+              <i class="bi bi-link-45deg"></i> Copy link
+            </button>
+            <a href="event.html" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Back to events</a>
+          </div>
+
+          <p class="mt-3 text-muted small" id="attCount" aria-live="polite"></p>
+          <div id="attListCard" class="card mt-2 d-none" aria-live="polite">
+            <div class="card-header">Attendees (public demo)</div>
+            <ul id="attList" class="list-group list-group-flush small"></ul>
+          </div>
+        </div>
+      `;
+
+      // RSVP behaviour
+      document.getElementById('rsvp').addEventListener('click', ()=>{
+        if(!isLoggedIn()){ location.href = loginHref; return; }
+        const ok = addRsvp(e.id, authEmail());
+        toast(ok ? 'Registered successfully!' : 'You are already registered for this event.');
+        updateAttendees();
+      });
+
+      // Copy link
+      document.getElementById('copyLink').addEventListener('click', ()=>{
+        navigator.clipboard.writeText(location.href).then(()=> toast('Link copied'));
+      });
+
+      // initial attendees
+      updateAttendees();
+
+      function updateAttendees(){
+        const all = getRsvps().filter(x => String(x.eventId)===String(e.id));
+        const n = all.length;
+        document.getElementById('attCount').textContent =
+          n ? `${n} attendee(s) registered (local demo data)` : 'Be the first to register!';
+        const card = document.getElementById('attListCard');
+        const list = document.getElementById('attList');
+        if(n){
+          card.classList.remove('d-none');
+          list.innerHTML = all.slice(0,25).map(x =>
+            `<li class="list-group-item d-flex justify-content-between align-items-center">
+               ${maskEmail(x.email)}
+               <span class="badge bg-secondary">${new Date(x.at).toLocaleDateString()}</span>
+             </li>`).join('');
+        } else {
+          card.classList.add('d-none'); list.innerHTML = '';
+        }
+      }
+    }).catch(()=>{
+      container.innerHTML = '<div class="col-12"><div class="alert alert-danger">Failed to load event data.</div></div>';
+    });
+  }
+</script>
+</body>
+</html>
